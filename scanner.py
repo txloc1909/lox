@@ -19,6 +19,8 @@ class Scanner:
 
     def _scan_one_token(self):
         char = self._advance()
+
+        ### Single-character tokens
         if char == "(":
             self._add_token(TokenType.LEFT_PAREN)
         elif char == ")":
@@ -39,13 +41,41 @@ class Scanner:
             self._add_token(TokenType.SEMICOLON)
         elif char == "*":
             self._add_token(TokenType.STAR)
+        ### Two-character
+        elif char == "!":
+            self._add_token(
+                TokenType.BANG_EQUAL if self._match("=") else TokenType.BANG
+            )
+        elif char == "=":
+            self._add_token(
+                TokenType.EQUAL_EQUAL if self._match("=") else TokenType.EQUAL
+            )
+        elif char == "<":
+            self._add_token(
+                TokenType.LESS_EQUAL if self._match("=") else TokenType.LESS
+            )
+        elif char == ">":
+            self._add_token(
+                TokenType.GREATER_EQUAL if self._match("=") else TokenType.GREATER
+            )
+        elif char == "/":
+            # Ignore comments
+            if self._match("/"):
+                while self._peek() != "\n" and not self._at_end():
+                    self._advance()
+            else:
+                self._add_token(TokenType.SLASH)
+        elif char in (" ", "\r", "\t"):
+            # do nothing with whitespaces
+            pass
         elif char == "\n":
             self._add_token(TokenType.NEWLINE)
+            self._line += 1
         else:
             raise ValueError(f"Unexpected character: {char} at line {self._line}")
 
     def _at_end(self):
-        return self._current > len(self._src) - 1
+        return self._current >= len(self._src)
 
     def _advance(self):
         next_char = self._src[self._current]
@@ -55,3 +85,15 @@ class Scanner:
     def _add_token(self, token_type: TokenType, literal=None):
         text = self._src[self._start:self._current]
         self._tokens.append(Token(token_type, text, literal, self._line))
+
+    def _match(self, expected) -> bool:
+        if self._at_end():
+            return False
+        elif self._src[self._current] != expected:
+            return False
+        else:
+            self._current += 1
+            return True
+
+    def _peek(self):
+        return "\0" if self._at_end() else self._src[self._current]
