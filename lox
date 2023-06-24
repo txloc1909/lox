@@ -4,6 +4,9 @@ import sys
 
 from scanner import Scanner
 
+
+_HAS_ERROR = False
+
 def run(src: str):
     scanner = Scanner(src)
     tokens = scanner.scan_tokens()
@@ -14,15 +17,24 @@ def run(src: str):
 
 
 def run_file(fname):
+    global _HAS_ERROR
     run(open(fname).read())
+    if _HAS_ERROR:
+        sys.exit(65)
 
 
 def run_prompt():
+    global _HAS_ERROR
     while True:
-        line = input(">>> ")
-        if not line:
+        try:
+            line = input(">>> ")
+        except EOFError:
+            # CTRL-D exit the intepreter
             break
-        run(line)
+
+        if line:
+            run(line)
+            _HAS_ERROR = False
 
 
 def main(args):

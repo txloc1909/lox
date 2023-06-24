@@ -1,4 +1,5 @@
 from token import TokenType, Token
+import utils
 
 
 class Scanner:
@@ -72,7 +73,7 @@ class Scanner:
             self._add_token(TokenType.NEWLINE)
             self._line += 1
         else:
-            raise ValueError(f"Unexpected character: {char} at line {self._line}")
+            utils.error(self._line, f"Unexpected character: {char}")
 
     def _at_end(self):
         return self._current >= len(self._src)
