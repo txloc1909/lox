@@ -7,6 +7,5 @@ def report(line: int, where: str, message: str):
     _HAS_ERROR = True
 
 
-
 def error(line: int, message: str):
     report(line, "", message)

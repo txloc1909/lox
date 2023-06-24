@@ -75,7 +75,10 @@ class Scanner:
         elif char == '"':
             self._scan_string_literal()
         else:
-            utils.error(self._line, f"Unexpected character: {char}")
+            if char.isdigit():
+                self._scan_number_literal()
+            else:
+                utils.error(self._line, f"Unexpected character: {char}")
 
     def _at_end(self):
         return self._current >= len(self._src)
@@ -101,6 +104,10 @@ class Scanner:
     def _peek(self):
         return "\0" if self._at_end() else self._src[self._current]
 
+    def _peek_next(self):
+        return "\0" if self._current + 1 >= len(self._src) else \
+                self._src[self._current + 1]
+
     def _scan_string_literal(self):
         while self._peek() != '"' and not self._at_end():
             if self._peek() == "\n":
@@ -116,3 +123,20 @@ class Scanner:
         # Extract string literal (without the quotes)
         literal = self._src[self._start + 1 : self._current - 1]
         self._add_token(TokenType.STRING, literal=literal)
+
+    def _scan_number_literal(self):
+        while self._peek().isdigit():
+            self._advance()
+
+        # Look for a fractional part (.)
+        if self._peek() == "." and self._peek_next().isdigit():
+            # Consume the dot (.)
+            self._advance()
+
+            while self._peek().isdigit():
+                self._advance()
+
+        self._add_token(
+            TokenType.NUMBER,
+            literal=float(self._src[self._start:self._current])
+        )
