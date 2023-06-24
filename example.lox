@@ -1,9 +1,22 @@
 (()){},.,+-*;
 // This is a comment
-"This is a string literal"
-11.112
-83924
-!= = <
-    <= >= >
-  < < > >
+s = "This is a string literal"
+a = 11.112
+foo = 83924
+fun add_one(a) {
+    b = a + 1;
+    return b;
+}
+if a >= 0 {
+    c = true;
+    d = a + 2.2
+} else {
+    c = false;
+    d = a - 2.2;
+}
+class Person {
+    fun greet() {
+        print "Hello";
+    }
+}
 "Un-terminated string

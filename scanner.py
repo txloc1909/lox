@@ -1,4 +1,5 @@
 from token import TokenType, Token
+from keywords import _KEYWORDS
 import utils
 
 
@@ -77,6 +78,8 @@ class Scanner:
         else:
             if char.isdigit():
                 self._scan_number_literal()
+            elif char.isalpha():
+                self._scan_identifier()
             else:
                 utils.error(self._line, f"Unexpected character: {char}")
 
@@ -140,3 +143,11 @@ class Scanner:
             TokenType.NUMBER,
             literal=float(self._src[self._start:self._current])
         )
+
+    def _scan_identifier(self):
+        while self._peek().isalnum() or self._peek() == "_":
+            self._advance()
+
+        lexeme = self._src[self._start : self._current]
+        token_type = _KEYWORDS.get(lexeme, TokenType.IDENTIFIER)
+        self._add_token(token_type)
