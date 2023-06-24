@@ -1,5 +1,7 @@
 (()){},.,+-*;
 // This is a comment
+"This is a string literal"
 != = <
     <= >= >
   < < > >
+"Un-terminated string

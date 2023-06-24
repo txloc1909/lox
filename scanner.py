@@ -72,6 +72,8 @@ class Scanner:
         elif char == "\n":
             self._add_token(TokenType.NEWLINE)
             self._line += 1
+        elif char == '"':
+            self._scan_string_literal()
         else:
             utils.error(self._line, f"Unexpected character: {char}")
 
@@ -84,8 +86,8 @@ class Scanner:
         return next_char
 
     def _add_token(self, token_type: TokenType, literal=None):
-        text = self._src[self._start:self._current]
-        self._tokens.append(Token(token_type, text, literal, self._line))
+        lexeme = self._src[self._start:self._current]
+        self._tokens.append(Token(token_type, lexeme, literal, self._line))
 
     def _match(self, expected) -> bool:
         if self._at_end():
@@ -98,3 +100,19 @@ class Scanner:
 
     def _peek(self):
         return "\0" if self._at_end() else self._src[self._current]
+
+    def _scan_string_literal(self):
+        while self._peek() != '"' and not self._at_end():
+            if self._peek() == "\n":
+                self._line += 1
+            self._advance()
+
+        if self._at_end():
+            utils.error(self._line, "Unterminated string.")
+            return
+
+        self._advance()             # The closing \"
+
+        # Extract string literal (without the quotes)
+        literal = self._src[self._start + 1 : self._current - 1]
+        self._add_token(TokenType.STRING, literal=literal)
