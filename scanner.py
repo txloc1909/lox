@@ -63,7 +63,7 @@ class Token:
         self._line = line
 
     def __repr__(self):
-        return f"{self._type}(\"{self._lexeme}\", {self._literal})"
+        return f"{self._type.name} {self._lexeme} {self._literal}"
 
 
 _KEYWORDS: Mapping[str, TokenType] = {
