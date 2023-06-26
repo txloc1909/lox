@@ -51,7 +51,6 @@ class TokenType(Enum):
     VAR = 'VAR'
     WHILE = 'WHILE'
 
-    NEWLINE = 'NEWLINE'
     EOF = 'EOF'
 
 
@@ -154,7 +153,6 @@ class Scanner:
             # do nothing with whitespaces
             pass
         elif char == "\n":
-            self._add_token(TokenType.NEWLINE)
             self._line += 1
         elif char == '"':
             self._scan_string_literal()
