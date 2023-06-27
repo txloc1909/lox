@@ -1,10 +1,12 @@
 import sys
 
 
+HAS_ERROR = False
+
 def report(line: int, where: str, message: str):
-    global _HAS_ERROR
+    global HAS_ERROR
     print(f"[Line {line}] Error {where}: {message}", file=sys.stderr)
-    _HAS_ERROR = True
+    HAS_ERROR = True
 
 
 def error(line: int, message: str):

@@ -1,7 +1,7 @@
 from collections.abc import Mapping
 
 from _token import TokenType, Token
-import utils
+from error_handling import error
 
 _KEYWORDS: Mapping[str, TokenType] = {
         "and" :         TokenType.AND,
@@ -100,7 +100,7 @@ class Scanner:
             elif char.isalpha():
                 self._scan_identifier()
             else:
-                utils.error(self._line, f"Unexpected character: {char}")
+                error(self._line, f"Unexpected character: {char}")
 
     def _at_end(self) -> bool:
         return self._current >= len(self._src)
@@ -137,7 +137,7 @@ class Scanner:
             self._advance()
 
         if self._at_end():
-            utils.error(self._line, "Unterminated string.")
+            error(self._line, "Unterminated string.")
             return
 
         self._advance()             # The closing \"

@@ -2,12 +2,11 @@
 
 import sys
 
+import error_handling
 from scanner import Scanner
 from parser import Parser
 from ast_printer import ASTPrinter
 
-
-_HAS_ERROR = False
 
 def run(src: str):
     scanner = Scanner(src)
@@ -15,21 +14,19 @@ def run(src: str):
     parser = Parser(tokens)
     expr = parser.parse()
 
-    if _HAS_ERROR or not expr:
+    if error_handling.HAS_ERROR:
         return
 
     print(ASTPrinter().print(expr))
 
 
 def run_file(fname):
-    global _HAS_ERROR
     run(open(fname).read())
-    if _HAS_ERROR:
+    if error_handling.HAS_ERROR:
         sys.exit(65)
 
 
 def run_prompt():
-    global _HAS_ERROR
     while True:
         try:
             line = input(">>> ")
@@ -39,7 +36,7 @@ def run_prompt():
 
         if line:
             run(line)
-            _HAS_ERROR = False
+            error_handling.HAS_ERROR = False
 
 
 def main(args):
