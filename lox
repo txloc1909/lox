@@ -3,6 +3,8 @@
 import sys
 
 from scanner import Scanner
+from parser import Parser
+from ast_printer import ASTPrinter
 
 
 _HAS_ERROR = False
@@ -10,10 +12,13 @@ _HAS_ERROR = False
 def run(src: str):
     scanner = Scanner(src)
     tokens = scanner.scan_tokens()
+    parser = Parser(tokens)
+    expr = parser.parse()
 
-    # for now, just print all the tokens
-    for t in tokens:
-        print(t)
+    if _HAS_ERROR or not expr:
+        return
+
+    print(ASTPrinter().print(expr))
 
 
 def run_file(fname):
