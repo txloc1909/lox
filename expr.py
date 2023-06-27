@@ -33,7 +33,7 @@ class Grouping(Expr):
 
 @dataclass
 class Literal(Expr):
-    value: Real | str | None
+    value: Real | str | bool | None
 
 
 @dataclass

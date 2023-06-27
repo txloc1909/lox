@@ -57,7 +57,7 @@ class TokenType(Enum):
 class Token:
     type_: TokenType
     lexeme: str
-    literal: Real | str | None
+    literal: Real | str | bool | None
     line: int
 
     def __repr__(self):
