@@ -25,5 +25,5 @@ def error(line: int, message: str):
 
 def runtime_error(error: LoxRuntimeError):
     global HAS_RUNTIME_ERROR
-    print(f"{e}\n[line {error.token.line}]")
+    print(f"{error}\n[line {error.token.line}]")
     HAS_RUNTIME_ERROR = True
