@@ -5,25 +5,30 @@ import sys
 import error_handling
 from scanner import Scanner
 from parser import Parser
-from ast_printer import ASTPrinter
+# from ast_printer import ASTPrinter
+from intepreter import Interpreter
 
 
 def run(src: str):
+    interpreter = Interpreter()
     scanner = Scanner(src)
     tokens = scanner.scan_tokens()
     parser = Parser(tokens)
     expr = parser.parse()
 
-    if error_handling.HAS_ERROR:
+    if error_handling.HAS_ERROR and not expr:
         return
 
-    print(ASTPrinter().print(expr))
+    # print(ASTPrinter().print(expr))
+    interpreter.interpret(expr)
 
 
 def run_file(fname):
     run(open(fname).read())
     if error_handling.HAS_ERROR:
         sys.exit(65)
+    if error_handling.HAS_RUNTIME_ERROR:
+        sys.exit(70)
 
 
 def run_prompt():

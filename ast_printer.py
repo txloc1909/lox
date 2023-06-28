@@ -1,12 +1,5 @@
 from scanner import TokenType, Token
-from expr import (
-    Visitor,
-    Expr,
-    Binary,
-    Grouping,
-    Literal,
-    Unary,
-)
+from expr import Visitor, Expr, Binary, Grouping, Literal, Unary
 
 
 class ASTPrinter:
@@ -15,7 +8,7 @@ class ASTPrinter:
         return expr.accept(self)
 
     def visit(self, expr: Expr):
-        return getattr(self, f"visit_{expr.__class__.__name__}")(expr)
+        return getattr(self, f"visit_{type(expr).__name__}")(expr)
 
     def visit_Binary(self, expr: Binary):
         return self._parenthesize(expr.operator.lexeme, expr.left, expr.right)
