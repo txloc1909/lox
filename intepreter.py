@@ -1,5 +1,6 @@
 from _token import Token, TokenType
-from expr import Visitor, Expr, Binary, Grouping, Literal, Unary
+from expr import Expr, Binary, Grouping, Literal, Unary
+from visitor import Visitor
 from error_handling import LoxRuntimeError
 
 

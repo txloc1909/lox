@@ -1,17 +1,7 @@
 from dataclasses import dataclass
-from typing import Protocol, runtime_checkable
-from numbers import Real
 
 from scanner import Token
-
-
-@runtime_checkable
-class Visitor(Protocol):
-    def visit(self, expr):
-        '''
-        Dynamically dispatching according to the type of `expr`
-        '''
-        pass
+from visitor import Visitor
 
 
 class Expr:

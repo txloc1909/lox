@@ -7,24 +7,23 @@ class ASTPrinter:
     def print(self, expr: Expr):
         return expr.accept(self)
 
-    def visit(self, expr: Expr):
+    def visit(self, expr: Expr) -> str:
         return getattr(self, f"visit_{type(expr).__name__}")(expr)
 
-    def visit_Binary(self, expr: Binary):
+    def visit_Binary(self, expr: Binary) -> str:
         return self._parenthesize(expr.operator.lexeme, expr.left, expr.right)
 
-    def visit_Grouping(self, expr: Grouping):
+    def visit_Grouping(self, expr: Grouping) -> str:
         return self._parenthesize("group", expr.inner)
 
-    def visit_Literal(self, expr: Literal):
+    def visit_Literal(self, expr: Literal) -> str:
         return "nil" if expr.value is None else str(expr.value)
 
-    def visit_Unary(self, expr: Unary):
+    def visit_Unary(self, expr: Unary) -> str:
         return self._parenthesize(expr.operator.lexeme, expr.right)
 
-    def _parenthesize(self, name: str, *exprs: Expr):
+    def _parenthesize(self, name: str, *exprs: Expr) -> str:
         return f"({name} " + " ".join(e.accept(self) for e in exprs) + ")"
-
 
 
 if __name__ == "__main__":
