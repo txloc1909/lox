@@ -1,5 +1,5 @@
 from _token import Token, TokenType
-from expr import Expr, Binary, Grouping, Literal, Unary
+from expr import Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr
 from visitor import Visitor
 from error_handling import LoxRuntimeError
 
@@ -47,13 +47,13 @@ class Interpreter:
     def visit(self, expr: Expr):
         return getattr(self, f"visit_{type(expr).__name__}")(expr)
 
-    def visit_Literal(self, expr: Literal):
+    def visit_LiteralExpr(self, expr: LiteralExpr):
         return expr.value
 
-    def visit_Grouping(self, expr: Grouping):
+    def visit_GroupingExpr(self, expr: GroupingExpr):
         return self.evaluate(expr.inner)
 
-    def visit_Unary(self, expr: Unary):
+    def visit_UnaryExpr(self, expr: UnaryExpr):
         right = self.evaluate(expr.right)
 
         match expr.operator.type_:
@@ -65,7 +65,7 @@ class Interpreter:
             case _:
                 return None
 
-    def visit_Binary(self, expr: Binary):
+    def visit_BinaryExpr(self, expr: BinaryExpr):
         left = self.evaluate(expr.left)
         right = self.evaluate(expr.right)
 
@@ -109,25 +109,25 @@ class Interpreter:
 if __name__ == "__main__":
     assert issubclass(Interpreter, Visitor)
 
-    expr1 = Binary(
-        left=Literal(2.0),
+    expr1 = BinaryExpr(
+        left=LiteralExpr(2.0),
         operator=Token(TokenType.STAR, "*", None, 1),
-        right=Grouping(
-            inner=Binary(
-                left=Literal(3.0),
+        right=GroupingExpr(
+            inner=BinaryExpr(
+                left=LiteralExpr(3.0),
                 operator=Token(TokenType.SLASH, "/", None, 1),
-                right=Unary(
+                right=UnaryExpr(
                     operator=Token(TokenType.MINUS, "-", None, 1),
-                    right=Literal(12.12),
+                    right=LiteralExpr(12.12),
                 ),
             )
         ),
     )
 
-    expr2 = Unary(
+    expr2 = UnaryExpr(
         # operator=Token(TokenType.BANG, "!", None, 1),
         operator=Token(TokenType.MINUS, "-", None, 1),
-        right=Literal(12.0),
+        right=LiteralExpr(12.0),
     )
 
     interpreter = Interpreter()

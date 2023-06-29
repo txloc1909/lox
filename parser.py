@@ -3,10 +3,10 @@ from typing import Optional
 from _token import TokenType, Token
 from expr import (
     Expr,
-    Binary,
-    Grouping,
-    Literal,
-    Unary,
+    BinaryExpr,
+    GroupingExpr,
+    LiteralExpr,
+    UnaryExpr,
 )
 from error_handling import report
 
@@ -40,7 +40,7 @@ class Parser:
         while self._match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL):
             operator = self._prev()
             right = self._comparison()
-            expr = Binary(expr, operator, right)
+            expr = BinaryExpr(expr, operator, right)
 
         return expr
 
@@ -50,7 +50,7 @@ class Parser:
         while self._match(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL):
             operator = self._prev()
             right = self._terminal()
-            expr = Binary(expr, operator, right)
+            expr = BinaryExpr(expr, operator, right)
 
         return expr
 
@@ -60,7 +60,7 @@ class Parser:
         while self._match(TokenType.MINUS, TokenType.PLUS):
             operator = self._prev()
             right = self._factor()
-            expr = Binary(expr, operator, right)
+            expr = BinaryExpr(expr, operator, right)
 
         return expr
 
@@ -70,7 +70,7 @@ class Parser:
         while self._match(TokenType.SLASH, TokenType.STAR):
             operator = self._prev()
             right = self._unary()
-            expr = Binary(expr, operator, right)
+            expr = BinaryExpr(expr, operator, right)
 
         return expr
 
@@ -78,23 +78,23 @@ class Parser:
         if self._match(TokenType.BANG, TokenType.MINUS):
             operator = self._prev()
             right = self._unary()
-            return Unary(operator, right)
+            return UnaryExpr(operator, right)
 
         return self._primary()
 
     def _primary(self) -> Expr:
         if self._match(TokenType.FALSE):
-            return Literal(False)
+            return LiteralExpr(False)
         elif self._match(TokenType.TRUE):
-            return Literal(True)
+            return LiteralExpr(True)
         elif self._match(TokenType.NIL):
-            return Literal(None)
+            return LiteralExpr(None)
         elif self._match(TokenType.NUMBER, TokenType.STRING):
-            return Literal(self._prev().literal)
+            return LiteralExpr(self._prev().literal)
         elif self._match(TokenType.LEFT_PAREN):
             expr = self._expression()
             self._consume(TokenType.RIGHT_PAREN, "Expect ')' after expression")
-            return Grouping(expr)
+            return GroupingExpr(expr)
         else:
             raise ParserError(self._peek(), "Expect expression.")
 

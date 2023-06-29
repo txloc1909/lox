@@ -10,23 +10,23 @@ class Expr:
 
 
 @dataclass
-class Binary(Expr):
+class BinaryExpr(Expr):
     left: Expr
     operator: Token
     right: Expr
 
 
 @dataclass
-class Grouping(Expr):
+class GroupingExpr(Expr):
     inner: Expr
 
 
 @dataclass
-class Literal(Expr):
+class LiteralExpr(Expr):
     value: float | str | bool | None
 
 
 @dataclass
-class Unary(Expr):
+class UnaryExpr(Expr):
     operator: Token
     right: Expr
