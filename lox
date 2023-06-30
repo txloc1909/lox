@@ -14,13 +14,13 @@ def run(src: str):
     scanner = Scanner(src)
     tokens = scanner.scan_tokens()
     parser = Parser(tokens)
-    expr = parser.parse()
+    statements = parser.parse()
 
-    if error_handling.HAS_ERROR and not expr:
+    if error_handling.HAS_ERROR:
         return
 
     # print(ASTPrinter().print(expr))
-    interpreter.interpret(expr)
+    interpreter.interpret(statements)
 
 
 def run_file(fname):
