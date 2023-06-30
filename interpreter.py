@@ -1,7 +1,8 @@
 from _token import Token, TokenType
-from expr import Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr
-from stmt import Stmt, ExpressionStmt, PrintStmt
+from expr import Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr, VarExpr
+from stmt import Stmt, ExpressionStmt, PrintStmt, VarStmt
 from visitor import Visitor
+from environment import Environment
 from error_handling import LoxRuntimeError
 
 
@@ -35,6 +36,9 @@ def stringify(value):
 
 class Interpreter:
 
+    def __init__(self):
+        self._env = Environment()
+
     def evaluate(self, expr: Expr):
         return expr.accept(self)
 
@@ -59,6 +63,17 @@ class Interpreter:
         value = self.evaluate(stmt.expr)
         print(stringify(value))
         return None
+
+    def visit_VarStmt(self, stmt: VarStmt):
+        if stmt.initializer:
+            value = self.evaluate(stmt.initializer)
+        else:
+            value = None
+
+        self._env.define(stmt.name.lexeme, value)
+
+    def visit_VarExpr(self, expr: VarExpr):
+        return self._env.get(expr.name)
 
     def visit_LiteralExpr(self, expr: LiteralExpr):
         return expr.value

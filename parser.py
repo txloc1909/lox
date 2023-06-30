@@ -1,8 +1,8 @@
 from typing import Optional
 
 from _token import TokenType, Token
-from expr import Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr
-from stmt import Stmt, ExpressionStmt, PrintStmt
+from expr import Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr, VarExpr
+from stmt import Stmt, ExpressionStmt, PrintStmt, VarStmt
 from error_handling import report
 
 
@@ -24,25 +24,43 @@ class Parser:
         statements: list[Stmt] = []
 
         while not self._at_end():
-            statements.append(self._statement())
+            stmt = self._declaration()
+            if stmt:
+                statements.append(stmt)
 
         return statements
 
-    def _statement(self):
+    def _declaration(self) -> Optional[Stmt]:
+        try:
+            if self._match(TokenType.VAR):
+                return self._var_declaration()
+            else:
+                return self._statement()
+        except ParserError:
+            self._synchronize()
+            return None
+
+    def _statement(self) -> Stmt:
         if self._match(TokenType.PRINT):
             return self._print_stmt()
         else:
             return self._expression_stmt()
 
-    def _print_stmt(self):
+    def _print_stmt(self) -> PrintStmt:
         value = self._expression()
         self._consume(TokenType.SEMICOLON, "Expect ';' after value.")
         return PrintStmt(value)
 
-    def _expression_stmt(self):
+    def _expression_stmt(self) -> ExpressionStmt:
         expr = self._expression()
         self._consume(TokenType.SEMICOLON, "Expect ';' after expression.")
         return ExpressionStmt(expr)
+
+    def _var_declaration(self) -> VarStmt:
+        name = self._consume(TokenType.IDENTIFIER, "Expect variable name.")
+        initializer = self._expression() if self._match(TokenType.EQUAL) else None
+        self._consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
+        return VarStmt(name, initializer)
 
     def _expression(self) -> Expr:
         return self._equality()
@@ -104,6 +122,8 @@ class Parser:
             return LiteralExpr(None)
         elif self._match(TokenType.NUMBER, TokenType.STRING):
             return LiteralExpr(self._prev().literal)
+        elif self._match(TokenType.IDENTIFIER):
+            return VarExpr(self._prev())
         elif self._match(TokenType.LEFT_PAREN):
             expr = self._expression()
             self._consume(TokenType.RIGHT_PAREN, "Expect ')' after expression")

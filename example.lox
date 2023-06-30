@@ -1,3 +1,8 @@
-// (10 + 1.23 * 5.67) / -2 * 11.5;
-// "hello" + " " + "world";
-! true
+var x = 1.1;
+var y = 2.0;
+print (x + y) * y;
+print !(x >= y);
+
+var s1 = "hello";
+var s2 = "world";
+print s1 + " " + s2;

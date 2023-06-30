@@ -30,3 +30,7 @@ class LiteralExpr(Expr):
 class UnaryExpr(Expr):
     operator: Token
     right: Expr
+
+@dataclass
+class VarExpr(Expr):
+    name: Token

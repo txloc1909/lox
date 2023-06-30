@@ -1,5 +1,7 @@
 from dataclasses import dataclass
+from typing import Optional
 
+from _token import Token
 from expr import Expr
 from visitor import Visitor
 
@@ -17,3 +19,9 @@ class ExpressionStmt(Stmt):
 @dataclass
 class PrintStmt(Stmt):
     expr: Expr
+
+
+@dataclass
+class VarStmt(Stmt):
+    name: Token
+    initializer: Optional[Expr]
