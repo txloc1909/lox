@@ -1,6 +1,6 @@
 from _token import Token, TokenType
 from expr import Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr, VarExpr, AssignExpr
-from stmt import Stmt, ExpressionStmt, PrintStmt, VarStmt
+from stmt import Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt
 from visitor import Visitor
 from environment import Environment
 from error_handling import LoxRuntimeError
@@ -72,6 +72,9 @@ class Interpreter:
 
         self._env.define(stmt.name.lexeme, value)
 
+    def visit_BlockStmt(self, stmt: BlockStmt):
+        self._execute_block(stmt.statements, Environment(enclosing=self._env))
+
     def visit_VarExpr(self, expr: VarExpr):
         return self._env.get(expr.name)
 
@@ -137,6 +140,16 @@ class Interpreter:
                 return left == right
             case _:
                 return None
+
+    def _execute_block(self, statements: list[Stmt], env: Environment):
+        # NOTE: use context manager, probably?
+        prev_env = self._env
+        try:
+            self._env = env
+            for stmt in statements:
+                self.execute(stmt)
+        finally:
+            self._env = prev_env
 
 
 if __name__ == "__main__":

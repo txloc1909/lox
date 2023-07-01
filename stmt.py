@@ -25,3 +25,8 @@ class PrintStmt(Stmt):
 class VarStmt(Stmt):
     name: Token
     initializer: Optional[Expr]
+
+
+@dataclass
+class BlockStmt(Stmt):
+    statements: list[Stmt]

@@ -2,7 +2,7 @@ from typing import Optional
 
 from _token import TokenType, Token
 from expr import Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr, VarExpr, AssignExpr
-from stmt import Stmt, ExpressionStmt, PrintStmt, VarStmt
+from stmt import Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt
 from error_handling import report
 
 
@@ -43,6 +43,8 @@ class Parser:
     def _statement(self) -> Stmt:
         if self._match(TokenType.PRINT):
             return self._print_stmt()
+        elif self._match(TokenType.LEFT_BRACE):
+            return BlockStmt(self._block_stmt())
         else:
             return self._expression_stmt()
 
@@ -61,6 +63,15 @@ class Parser:
         initializer = self._expression() if self._match(TokenType.EQUAL) else None
         self._consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
         return VarStmt(name, initializer)
+
+    def _block_stmt(self) -> list[Stmt]:
+        statements: list[Stmt] = []
+
+        while not self._check(TokenType.RIGHT_BRACE) and not self._at_end():
+            statements.append(self._declaration())
+
+        self._consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
+        return statements
 
     def _expression(self) -> Expr:
         return self._assignment()
