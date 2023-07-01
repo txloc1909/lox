@@ -1,7 +1,7 @@
 from typing import Optional
 
 from _token import TokenType, Token
-from expr import Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr, VarExpr
+from expr import Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr, VarExpr, AssignExpr
 from stmt import Stmt, ExpressionStmt, PrintStmt, VarStmt
 from error_handling import report
 
@@ -63,7 +63,22 @@ class Parser:
         return VarStmt(name, initializer)
 
     def _expression(self) -> Expr:
-        return self._equality()
+        return self._assignment()
+
+    def _assignment(self) -> Expr:
+        expr = self._equality()
+
+        if self._match(TokenType.EQUAL):
+            equals = self._prev()
+            value = self._assignment()
+
+            if isinstance(expr, VarExpr):
+                name = expr.name
+                return AssignExpr(name, value)
+            else:
+                raise ParserError(equals, "Invalid assignment target.")
+        else:
+            return expr
 
     def _equality(self) -> Expr:
         expr = self._comparison()

@@ -1,4 +1,5 @@
 from _token import Token
+from error_handling import LoxRuntimeError
 
 
 class Environment:
@@ -11,5 +12,11 @@ class Environment:
     def get(self, name: Token):
         if name.lexeme in self._values:
             return self._values[name.lexeme]
+        else:
+            raise LoxRuntimeError(name, f"Undefined variable '{name.lexeme}'.")
+
+    def assign(self, name: Token, value):
+        if name.lexeme in self._values:
+            self._values[name.lexeme] = value
         else:
             raise LoxRuntimeError(name, f"Undefined variable '{name.lexeme}'.")

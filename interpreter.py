@@ -1,5 +1,5 @@
 from _token import Token, TokenType
-from expr import Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr, VarExpr
+from expr import Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr, VarExpr, AssignExpr
 from stmt import Stmt, ExpressionStmt, PrintStmt, VarStmt
 from visitor import Visitor
 from environment import Environment
@@ -74,6 +74,11 @@ class Interpreter:
 
     def visit_VarExpr(self, expr: VarExpr):
         return self._env.get(expr.name)
+
+    def visit_AssignExpr(self, expr: AssignExpr):
+        value = self.evaluate(expr.value)
+        self._env.assign(expr.name, value)
+        return value
 
     def visit_LiteralExpr(self, expr: LiteralExpr):
         return expr.value

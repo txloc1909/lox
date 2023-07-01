@@ -31,6 +31,13 @@ class UnaryExpr(Expr):
     operator: Token
     right: Expr
 
+
 @dataclass
 class VarExpr(Expr):
     name: Token
+
+
+@dataclass
+class AssignExpr(Expr):
+    name: Token
+    value: Expr
