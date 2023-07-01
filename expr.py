@@ -41,3 +41,10 @@ class VarExpr(Expr):
 class AssignExpr(Expr):
     name: Token
     value: Expr
+
+
+@dataclass
+class LogicalExpr(Expr):
+    left: Expr
+    operator: Token
+    right: Expr

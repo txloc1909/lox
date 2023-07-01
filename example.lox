@@ -7,7 +7,6 @@ var s1 = "hello";
 var s2 = "world";
 print s1 + " " + s2;
 
-
 var a = "global a";
 var b = "global b";
 var c = "global c";
@@ -36,3 +35,8 @@ var a = 1;
     var a = a + 2;
     print a;                    // How does this suppose to behave?
 }
+
+if (a >= 0 and s1 + " " + s2 == "hello world" or !false)
+    print "It's true";
+else
+    print "It's false";

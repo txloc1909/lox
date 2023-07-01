@@ -1,8 +1,9 @@
 from typing import Optional
 
 from _token import TokenType, Token
-from expr import Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr, VarExpr, AssignExpr
-from stmt import Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt
+from expr import (Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr,
+                  VarExpr, AssignExpr, LogicalExpr)
+from stmt import Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt, IfStmt
 from error_handling import report
 
 
@@ -41,7 +42,9 @@ class Parser:
             return None
 
     def _statement(self) -> Stmt:
-        if self._match(TokenType.PRINT):
+        if self._match(TokenType.IF):
+            return self._if_stmt()
+        elif self._match(TokenType.PRINT):
             return self._print_stmt()
         elif self._match(TokenType.LEFT_BRACE):
             return BlockStmt(self._block_stmt())
@@ -73,11 +76,24 @@ class Parser:
         self._consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
         return statements
 
+    def _if_stmt(self) -> IfStmt:
+        self._consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.")
+        condition = self._expression()
+        self._consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.")
+
+        then_branch = self._statement()
+
+        # Dangling-else problem:
+        # since Lox doesn't care about whitespaces (like Python),
+        # `else` is bind to the nearest `if` that precedes it
+        else_branch = self._statement() if self._match(TokenType.ELSE) else None
+        return IfStmt(condition, then_branch, else_branch)
+
     def _expression(self) -> Expr:
         return self._assignment()
 
     def _assignment(self) -> Expr:
-        expr = self._equality()
+        expr = self._or_expr()
 
         if self._match(TokenType.EQUAL):
             equals = self._prev()
@@ -90,6 +106,26 @@ class Parser:
                 raise ParserError(equals, "Invalid assignment target.")
         else:
             return expr
+
+    def _or_expr(self) -> Expr:
+        expr = self._and_expr()
+
+        while self._match(TokenType.OR):
+            operator = self._prev()
+            right = self._and_expr()
+            expr = LogicalExpr(expr, operator, right)
+
+        return expr
+
+    def _and_expr(self) -> Expr:
+        expr = self._equality()
+
+        while self._match(TokenType.AND):
+            operator = self._prev()
+            right = self._and_expr()
+            expr = LogicalExpr(expr, operator, right)
+
+        return expr
 
     def _equality(self) -> Expr:
         expr = self._comparison()

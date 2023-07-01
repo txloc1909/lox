@@ -1,6 +1,7 @@
 from _token import Token, TokenType
-from expr import Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr, VarExpr, AssignExpr
-from stmt import Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt
+from expr import (Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr,
+                  VarExpr, AssignExpr, LogicalExpr)
+from stmt import Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt, IfStmt
 from visitor import Visitor
 from environment import Environment
 from error_handling import LoxRuntimeError
@@ -75,6 +76,14 @@ class Interpreter:
     def visit_BlockStmt(self, stmt: BlockStmt):
         self._execute_block(stmt.statements, Environment(enclosing=self._env))
 
+    def visit_IfStmt(self, stmt: IfStmt):
+        if bool(self.evaluate(stmt.condition)):
+            self.execute(stmt.then_branch)
+        elif stmt.else_branch:
+            self.execute(stmt.else_branch)
+        else:
+            return None
+
     def visit_VarExpr(self, expr: VarExpr):
         return self._env.get(expr.name)
 
@@ -140,6 +149,21 @@ class Interpreter:
                 return left == right
             case _:
                 return None
+
+    def visit_LogicalExpr(self, expr: LogicalExpr):
+        left = self.evaluate(expr.left)
+
+        # Short-circuit:
+        # return the object, with its appropriate truthiness,
+        # not the literal True or false, and let the caller decide how to use
+        if expr.operator.type_ == TokenType.OR:
+            if left:
+                return left
+        else:
+            if not left:
+                return left
+
+        return self.evaluate(expr.right)
 
     def _execute_block(self, statements: list[Stmt], env: Environment):
         # NOTE: use context manager, probably?
