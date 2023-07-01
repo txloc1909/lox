@@ -3,7 +3,8 @@ from typing import Optional
 from _token import TokenType, Token
 from expr import (Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr,
                   VarExpr, AssignExpr, LogicalExpr)
-from stmt import Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt, IfStmt
+from stmt import (Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt, IfStmt,
+                  WhileStmt)
 from error_handling import report
 
 
@@ -46,6 +47,8 @@ class Parser:
             return self._if_stmt()
         elif self._match(TokenType.PRINT):
             return self._print_stmt()
+        elif self._match(TokenType.WHILE):
+            return self._while_stmt()
         elif self._match(TokenType.LEFT_BRACE):
             return BlockStmt(self._block_stmt())
         else:
@@ -88,6 +91,13 @@ class Parser:
         # `else` is bind to the nearest `if` that precedes it
         else_branch = self._statement() if self._match(TokenType.ELSE) else None
         return IfStmt(condition, then_branch, else_branch)
+
+    def _while_stmt(self) -> WhileStmt:
+        self._consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")
+        condition = self._expression()
+        self._consume(TokenType.RIGHT_PAREN, "Expect ')' after while condition.")
+        body = self._statement()
+        return WhileStmt(condition, body)
 
     def _expression(self) -> Expr:
         return self._assignment()

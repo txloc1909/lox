@@ -36,7 +36,8 @@ var a = 1;
     print a;                    // How does this suppose to behave?
 }
 
-if (a >= 0 and s1 + " " + s2 == "hello world" or !false)
-    print "It's true";
-else
-    print "It's false";
+var x = 5;
+while (x > 0) {
+    x = x - 1;
+}
+print x;

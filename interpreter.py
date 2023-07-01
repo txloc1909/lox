@@ -1,7 +1,8 @@
 from _token import Token, TokenType
 from expr import (Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr,
                   VarExpr, AssignExpr, LogicalExpr)
-from stmt import Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt, IfStmt
+from stmt import (Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt, IfStmt,
+                  WhileStmt)
 from visitor import Visitor
 from environment import Environment
 from error_handling import LoxRuntimeError
@@ -83,6 +84,10 @@ class Interpreter:
             self.execute(stmt.else_branch)
         else:
             return None
+
+    def visit_WhileStmt(self, stmt: WhileStmt):
+        while self.evaluate(stmt.condition):
+            self.execute(stmt.body)
 
     def visit_VarExpr(self, expr: VarExpr):
         return self._env.get(expr.name)

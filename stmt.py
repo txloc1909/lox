@@ -31,8 +31,15 @@ class VarStmt(Stmt):
 class BlockStmt(Stmt):
     statements: list[Stmt]
 
+
 @dataclass
 class IfStmt(Stmt):
     condition: Expr
     then_branch: Stmt
     else_branch: Stmt
+
+
+@dataclass
+class WhileStmt(Stmt):
+    condition: Expr
+    body: Stmt
