@@ -50,3 +50,9 @@ class FunctionStmt(Stmt):
     name: Token
     params: list[Token]
     body: list[Stmt]
+
+
+@dataclass
+class ReturnStmt(Stmt):
+    keyword: Token
+    value: Expr

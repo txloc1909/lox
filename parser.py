@@ -4,7 +4,7 @@ from _token import TokenType, Token
 from expr import (Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr,
                   VarExpr, AssignExpr, LogicalExpr, CallExpr)
 from stmt import (Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt, IfStmt,
-                  WhileStmt, FunctionStmt)
+                  WhileStmt, FunctionStmt, ReturnStmt)
 from error_handling import report
 
 
@@ -55,6 +55,8 @@ class Parser:
             return self._while_stmt()
         elif self._match(TokenType.LEFT_BRACE):
             return BlockStmt(self._block_stmt())
+        elif self._match(TokenType.RETURN):
+            return self._return_stmt()
         else:
             return self._expression_stmt()
 
@@ -154,6 +156,16 @@ class Parser:
         if initializer:
             body = BlockStmt([initializer, body])
         return body
+
+    def _return_stmt(self) -> ReturnStmt:
+        keyword = self._prev()
+        if not self._check(TokenType.SEMICOLON):
+            value = self._expression()
+        else:
+            value = None
+
+        self._consume(TokenType.SEMICOLON, "Expect ';' after return value.")
+        return ReturnStmt(keyword, value)
 
     def _expression(self) -> Expr:
         return self._assignment()

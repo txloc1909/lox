@@ -4,10 +4,10 @@ from _token import Token, TokenType
 from expr import (Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr,
                   VarExpr, AssignExpr, LogicalExpr, CallExpr)
 from stmt import (Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt, IfStmt,
-                  WhileStmt, FunctionStmt)
+                  WhileStmt, FunctionStmt, ReturnStmt)
 from visitor import Visitor
 from callable import LoxCallable
-from function import LoxFunction
+from function import LoxFunction, Return
 from environment import Environment
 from error_handling import LoxRuntimeError
 
@@ -110,6 +110,10 @@ class Interpreter:
     def visit_FunctionStmt(self, stmt: FunctionStmt):
         function = LoxFunction(stmt)
         self._env.define(stmt.name.lexeme, function)
+
+    def visit_ReturnStmt(self, stmt: ReturnStmt):
+        value = self.evaluate(stmt.value) if stmt.value else None
+        raise Return(value)
 
     def visit_VarExpr(self, expr: VarExpr):
         return self._env.get(expr.name)

@@ -42,15 +42,6 @@ while (x > 0) {
 }
 print x;
 
-// Fibonacci
-var a = 0;
-var tmp;
-for (var b = 1; a < 10000; b = tmp + b) {
-    print a;
-    tmp = a;
-    a = b;
-}
-
 fun sayHi(first, last) {
     print "Hi, " + first + " " + last + "!";
 }
@@ -60,3 +51,12 @@ sayHi("Dear", "Reader");
 var start = clock();
 var elapsed = clock() - start;
 print elapsed;
+
+fun fib(n) {
+    if (n <= 1) return n;
+    return fib(n-2) + fib(n-1);
+}
+
+for(var i = 0; i < 20; i=i+1) {
+    print fib(i);
+}
