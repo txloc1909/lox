@@ -48,3 +48,10 @@ class LogicalExpr(Expr):
     left: Expr
     operator: Token
     right: Expr
+
+
+@dataclass
+class CallExpr(Expr):
+    callee: Expr
+    paren: Token    # store the closing paren, for error handling
+    arguments: list[Expr]

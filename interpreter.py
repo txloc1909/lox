@@ -1,9 +1,13 @@
+import time
+
 from _token import Token, TokenType
 from expr import (Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr,
-                  VarExpr, AssignExpr, LogicalExpr)
+                  VarExpr, AssignExpr, LogicalExpr, CallExpr)
 from stmt import (Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt, IfStmt,
-                  WhileStmt)
+                  WhileStmt, FunctionStmt)
 from visitor import Visitor
+from callable import LoxCallable
+from function import LoxFunction
 from environment import Environment
 from error_handling import LoxRuntimeError
 
@@ -36,10 +40,28 @@ def stringify(value):
         return str(value)
 
 
+class _NativeClock:
+    def arity(self) -> int:
+        return 0
+
+    def call(self, intepreter, *arguments):
+        return time.perf_counter()
+
+    def __repr__(self):
+        return "<native fn>"
+
+
 class Interpreter:
 
     def __init__(self):
-        self._env = Environment()
+        self._GLOBAL_ENV = Environment()
+        self._env = self._GLOBAL_ENV
+
+        self._GLOBAL_ENV.define("clock", _NativeClock())
+
+    @property
+    def global_env(self) -> Environment:
+        return self._GLOBAL_ENV
 
     def evaluate(self, expr: Expr):
         return expr.accept(self)
@@ -59,12 +81,10 @@ class Interpreter:
 
     def visit_ExpressionStmt(self, stmt: ExpressionStmt):
         self.evaluate(stmt.expr)
-        return None
 
     def visit_PrintStmt(self, stmt: PrintStmt):
         value = self.evaluate(stmt.expr)
         print(stringify(value))
-        return None
 
     def visit_VarStmt(self, stmt: VarStmt):
         if stmt.initializer:
@@ -75,19 +95,21 @@ class Interpreter:
         self._env.define(stmt.name.lexeme, value)
 
     def visit_BlockStmt(self, stmt: BlockStmt):
-        self._execute_block(stmt.statements, Environment(enclosing=self._env))
+        self.execute_block(stmt.statements, Environment(enclosing=self._env))
 
     def visit_IfStmt(self, stmt: IfStmt):
         if bool(self.evaluate(stmt.condition)):
             self.execute(stmt.then_branch)
         elif stmt.else_branch:
             self.execute(stmt.else_branch)
-        else:
-            return None
 
     def visit_WhileStmt(self, stmt: WhileStmt):
         while self.evaluate(stmt.condition):
             self.execute(stmt.body)
+
+    def visit_FunctionStmt(self, stmt: FunctionStmt):
+        function = LoxFunction(stmt)
+        self._env.define(stmt.name.lexeme, function)
 
     def visit_VarExpr(self, expr: VarExpr):
         return self._env.get(expr.name)
@@ -170,7 +192,23 @@ class Interpreter:
 
         return self.evaluate(expr.right)
 
-    def _execute_block(self, statements: list[Stmt], env: Environment):
+    def visit_CallExpr(self, expr: CallExpr):
+        callee = self.evaluate(expr.callee)
+
+        # Important: order of evaluating arguments is kept
+        arguments = [self.evaluate(arg) for arg in expr.arguments]
+
+        if not isinstance(callee, LoxCallable):
+            raise LoxRuntimeError(expr.paren, "Can only call functions and classes.")
+
+        n_arguments = len(arguments)
+        f_arity = callee.arity()
+        if n_arguments != f_arity:
+            raise LoxRuntimeError(expr.paren, f"Expected {f_arity} arguments but got {n_arguments}.")
+
+        return callee.call(self, *arguments)
+
+    def execute_block(self, statements: list[Stmt], env: Environment):
         # NOTE: use context manager, probably?
         prev_env = self._env
         try:

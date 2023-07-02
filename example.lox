@@ -50,3 +50,13 @@ for (var b = 1; a < 10000; b = tmp + b) {
     tmp = a;
     a = b;
 }
+
+fun sayHi(first, last) {
+    print "Hi, " + first + " " + last + "!";
+}
+print sayHi;
+sayHi("Dear", "Reader");
+
+var start = clock();
+var elapsed = clock() - start;
+print elapsed;

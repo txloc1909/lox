@@ -2,9 +2,9 @@ from typing import Optional
 
 from _token import TokenType, Token
 from expr import (Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr,
-                  VarExpr, AssignExpr, LogicalExpr)
+                  VarExpr, AssignExpr, LogicalExpr, CallExpr)
 from stmt import (Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt, IfStmt,
-                  WhileStmt)
+                  WhileStmt, FunctionStmt)
 from error_handling import report
 
 
@@ -36,6 +36,8 @@ class Parser:
         try:
             if self._match(TokenType.VAR):
                 return self._var_declaration()
+            elif self._match(TokenType.FUN):
+                return self._func_declaration(kind="function")
             else:
                 return self._statement()
         except ParserError:
@@ -71,6 +73,25 @@ class Parser:
         initializer = self._expression() if self._match(TokenType.EQUAL) else None
         self._consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
         return VarStmt(name, initializer)
+
+    def _func_declaration(self, kind: str):
+        # NOTE: `kind` should take an Enum, instead of str?
+        name = self._consume(TokenType.IDENTIFIER, f"Expect {kind} name.")
+        self._consume(TokenType.LEFT_PAREN, f"Expect '(' after {kind} name.")
+        parameters: list[Token] = []
+        if not self._check(TokenType.RIGHT_PAREN):
+            while True:
+                if len(parameters) >= 255:
+                    raise ParserError(self._peek(), "Can't have more than 255 parameters.")
+
+                parameters.append(self._consume(TokenType.IDENTIFIER, "Expect parameter name."))
+                if not self._match(TokenType.COMMA):
+                    break
+
+        self._consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.")
+        self._consume(TokenType.LEFT_BRACE, f"Expect open brace before {kind} body")
+        body = self._block_stmt()
+        return FunctionStmt(name, parameters, body)
 
     def _block_stmt(self) -> list[Stmt]:
         statements: list[Stmt] = []
@@ -185,7 +206,10 @@ class Parser:
     def _comparison(self) -> Expr:
         expr = self._terminal()
 
-        while self._match(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL):
+        while self._match(TokenType.GREATER,
+                          TokenType.GREATER_EQUAL,
+                          TokenType.LESS,
+                          TokenType.LESS_EQUAL):
             operator = self._prev()
             right = self._terminal()
             expr = BinaryExpr(expr, operator, right)
@@ -218,7 +242,31 @@ class Parser:
             right = self._unary()
             return UnaryExpr(operator, right)
 
-        return self._primary()
+        return self._call()
+
+    def _call(self) -> Expr:
+        expr = self._primary()
+
+        while True:
+            if self._match(TokenType.LEFT_PAREN):
+                expr = self._finish_call(expr)
+            else:       # will expand later to handle object's properties
+                break
+
+        return expr
+
+    def _finish_call(self, callee: Expr) -> Expr:
+        arguments: list[Expr] = []
+        if not self._check(TokenType.RIGHT_PAREN):
+            while True:
+                if len(arguments) >= 255:
+                    raise ParserError(self._peek(), "Can't have more than 255 arguments.")
+                arguments.append(self._expression());
+                if not self._match(TokenType.COMMA):
+                    break
+
+        paren = self._consume(TokenType.RIGHT_PAREN, "Expect ')' after arguments.")
+        return CallExpr(callee, paren, arguments)
 
     def _primary(self) -> Expr:
         if self._match(TokenType.FALSE):
@@ -287,7 +335,7 @@ class Parser:
     def _prev(self) -> Token:
         return self._tokens[self._current - 1]
 
-    def _consume(self, type_: TokenType, message: str):
+    def _consume(self, type_: TokenType, message: str) -> Token:
         if self._check(type_):
             return self._advance()
 
