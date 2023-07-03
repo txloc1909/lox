@@ -108,7 +108,7 @@ class Interpreter:
             self.execute(stmt.body)
 
     def visit_FunctionStmt(self, stmt: FunctionStmt):
-        function = LoxFunction(stmt)
+        function = LoxFunction(declaration=stmt, closure=self._env)
         self._env.define(stmt.name.lexeme, function)
 
     def visit_ReturnStmt(self, stmt: ReturnStmt):

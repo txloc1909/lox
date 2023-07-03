@@ -11,8 +11,9 @@ class Return(Exception):
 
 class LoxFunction(LoxCallable):
 
-    def __init__(self, declaration: FunctionStmt):
+    def __init__(self, declaration: FunctionStmt, closure: Environment):
         self._declaration = declaration
+        self._closure = closure
 
     def arity(self) -> int:
         return len(self._declaration.params)
@@ -20,7 +21,7 @@ class LoxFunction(LoxCallable):
     def call(self, intepreter, *arguments):
         assert len(arguments) == self.arity()
 
-        env = Environment(enclosing=intepreter.global_env)
+        env = Environment(enclosing=self._closure)
         for name, value in zip(self._declaration.params, arguments):
             env.define(name.lexeme, value)
 
