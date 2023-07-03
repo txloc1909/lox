@@ -11,48 +11,48 @@ class Stmt:
         return visitor.visit(self)
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class ExpressionStmt(Stmt):
     expr: Expr
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class PrintStmt(Stmt):
     expr: Expr
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class VarStmt(Stmt):
     name: Token
     initializer: Optional[Expr]
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class BlockStmt(Stmt):
     statements: list[Stmt]
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class IfStmt(Stmt):
     condition: Expr
     then_branch: Stmt
     else_branch: Stmt
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class WhileStmt(Stmt):
     condition: Expr
     body: Stmt
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class FunctionStmt(Stmt):
     name: Token
     params: list[Token]
     body: list[Stmt]
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class ReturnStmt(Stmt):
     keyword: Token
     value: Expr

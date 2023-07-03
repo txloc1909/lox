@@ -9,48 +9,48 @@ class Expr:
         return visitor.visit(self)
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class BinaryExpr(Expr):
     left: Expr
     operator: Token
     right: Expr
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class GroupingExpr(Expr):
     inner: Expr
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class LiteralExpr(Expr):
     value: float | str | bool | None
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class UnaryExpr(Expr):
     operator: Token
     right: Expr
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class VarExpr(Expr):
     name: Token
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class AssignExpr(Expr):
     name: Token
     value: Expr
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class LogicalExpr(Expr):
     left: Expr
     operator: Token
     right: Expr
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class CallExpr(Expr):
     callee: Expr
     paren: Token    # store the closing paren, for error handling
