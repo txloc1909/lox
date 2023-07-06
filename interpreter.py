@@ -54,8 +54,9 @@ class _NativeClock:
 class Interpreter:
 
     def __init__(self):
-        self._GLOBAL_ENV = Environment()
-        self._env = self._GLOBAL_ENV
+        self._GLOBAL_ENV: Environment = Environment()
+        self._env: Environment = self._GLOBAL_ENV
+        self._locals: dict[Expr, int] = {}
 
         self._GLOBAL_ENV.define("clock", _NativeClock())
 
@@ -68,6 +69,11 @@ class Interpreter:
 
     def execute(self, stmt: Stmt):
         return stmt.accept(self)
+
+    def resolve(self, expr: Expr, depth: int):
+        if expr in self._locals:
+            print(f"WARNING: locals override: {expr}: from {self._locals[expr]} to {depth}")
+        self._locals[expr] = depth
 
     def interpret(self, statements: list[Stmt]):
         try:
@@ -116,11 +122,17 @@ class Interpreter:
         raise Return(value)
 
     def visit_VarExpr(self, expr: VarExpr):
-        return self._env.get(expr.name)
+        return self._lookup_variable(expr.name, expr)
 
     def visit_AssignExpr(self, expr: AssignExpr):
         value = self.evaluate(expr.value)
-        self._env.assign(expr.name, value)
+
+        distance = self._locals.get(expr)
+        if distance is not None:
+            self._env.assign_at(distance, expr.name, value)
+        else:
+            self.global_env.assign(expr.name, value)
+
         return value
 
     def visit_LiteralExpr(self, expr: LiteralExpr):
@@ -222,31 +234,13 @@ class Interpreter:
         finally:
             self._env = prev_env
 
+    def _lookup_variable(self, name: Token, expr: Expr):
+        distance = self._locals.get(expr)
+        if distance is not None:
+            return self._env.get_at(distance, name.lexeme)
+        else:
+            return self.global_env.get(name)
+
 
 if __name__ == "__main__":
     assert issubclass(Interpreter, Visitor)
-
-    expr1 = BinaryExpr(
-        left=LiteralExpr(2.0),
-        operator=Token(TokenType.STAR, "*", None, 1),
-        right=GroupingExpr(
-            inner=BinaryExpr(
-                left=LiteralExpr(3.0),
-                operator=Token(TokenType.SLASH, "/", None, 1),
-                right=UnaryExpr(
-                    operator=Token(TokenType.MINUS, "-", None, 1),
-                    right=LiteralExpr(12.12),
-                ),
-            )
-        ),
-    )
-
-    expr2 = UnaryExpr(
-        # operator=Token(TokenType.BANG, "!", None, 1),
-        operator=Token(TokenType.MINUS, "-", None, 1),
-        right=LiteralExpr(12.0),
-    )
-
-    interpreter = Interpreter()
-    interpreter.interpret(expr1)
-    interpreter.interpret(expr2)

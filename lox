@@ -5,6 +5,7 @@ import sys
 import error_handling
 from scanner import Scanner
 from parser import Parser
+from resolver import Resolver
 # from ast_printer import ASTPrinter
 from interpreter import Interpreter
 
@@ -18,7 +19,11 @@ def run(interpreter: Interpreter, src: str):
     if error_handling.HAS_ERROR:
         return
 
-    # print(ASTPrinter().print(expr))
+    resolver = Resolver(interpreter)
+    resolver.resolve(statements)
+    if error_handling.HAS_ERROR:
+        return
+
     interpreter.interpret(statements)
 
 

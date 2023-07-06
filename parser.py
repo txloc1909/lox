@@ -99,7 +99,8 @@ class Parser:
         statements: list[Stmt] = []
 
         while not self._check(TokenType.RIGHT_BRACE) and not self._at_end():
-            statements.append(self._declaration())
+            if declr := self._declaration():
+                statements.append(declr)
 
         self._consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
         return statements
@@ -128,6 +129,7 @@ class Parser:
         # `for` loop is just a syntactic sugar over `while` loop :shrug:
         self._consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'.")
 
+        initializer: Optional[Stmt] = None
         if self._match(TokenType.SEMICOLON):
             initializer = None
         elif self._match(TokenType.VAR):
@@ -305,7 +307,7 @@ class Parser:
             if self._prev().type_ == TokenType.SEMICOLON:
                 return
 
-            if self._peek().type_ in set(
+            if self._peek().type_ in (
                     TokenType.CLASS,
                     TokenType.FUN,
                     TokenType.VAR,

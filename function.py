@@ -1,6 +1,13 @@
+from enum import Enum
+
 from stmt import FunctionStmt
 from environment import Environment
 from callable import LoxCallable
+
+
+class FunctionType(Enum):
+    NONE = "NONE"
+    FUNCTION = "FUNCTION"
 
 
 class Return(Exception):

@@ -36,7 +36,7 @@ class BlockStmt(Stmt):
 class IfStmt(Stmt):
     condition: Expr
     then_branch: Stmt
-    else_branch: Stmt
+    else_branch: Optional[Stmt]
 
 
 @dataclass(frozen=True, slots=True)
@@ -55,4 +55,4 @@ class FunctionStmt(Stmt):
 @dataclass(frozen=True, slots=True)
 class ReturnStmt(Stmt):
     keyword: Token
-    value: Expr
+    value: Optional[Expr]
