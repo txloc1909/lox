@@ -56,3 +56,9 @@ class FunctionStmt(Stmt):
 class ReturnStmt(Stmt):
     keyword: Token
     value: Optional[Expr]
+
+
+@dataclass(frozen=True, slots=True)
+class ClassStmt(Stmt):
+    name: Token
+    methods: list[FunctionStmt]

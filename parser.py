@@ -4,7 +4,7 @@ from _token import TokenType, Token
 from expr import (Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr,
                   VarExpr, AssignExpr, LogicalExpr, CallExpr)
 from stmt import (Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt, IfStmt,
-                  WhileStmt, FunctionStmt, ReturnStmt)
+                  WhileStmt, FunctionStmt, ReturnStmt, ClassStmt)
 from error_handling import report
 
 
@@ -36,6 +36,8 @@ class Parser:
         try:
             if self._match(TokenType.VAR):
                 return self._var_declaration()
+            elif self._match(TokenType.CLASS):
+                return self._class_declaration()
             elif self._match(TokenType.FUN):
                 return self._func_declaration(kind="function")
             else:
@@ -94,6 +96,16 @@ class Parser:
         self._consume(TokenType.LEFT_BRACE, f"Expect open brace before {kind} body")
         body = self._block_stmt()
         return FunctionStmt(name, parameters, body)
+
+    def _class_declaration(self):
+        name = self._consume(TokenType.IDENTIFIER, "Expect class name.")
+        self._consume(TokenType.LEFT_BRACE, "Expect '{' before class body.")
+        methods: list[FunctionStmt] = []
+        while not self._check(TokenType.RIGHT_BRACE) and not self._at_end():
+            methods.append(self._func_declaration(kind="method"))
+        self._consume(TokenType.RIGHT_BRACE, "Expect '}' before class body.")
+        return ClassStmt(name, methods)
+
 
     def _block_stmt(self) -> list[Stmt]:
         statements: list[Stmt] = []
