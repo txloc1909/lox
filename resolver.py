@@ -71,6 +71,10 @@ class Resolver:
         self._declare(stmt.name)
         self._define(stmt.name)
 
+        for method in stmt.methods:
+            self._resolve_function(function=method,
+                                   func_type=FunctionType.METHOD)
+
     def visit_VarExpr(self, expr: VarExpr):
         if self._scopes and (expr.name.lexeme in self._scopes[-1]) \
                 and (not self._scopes[-1][expr.name.lexeme]):

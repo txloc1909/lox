@@ -8,6 +8,7 @@ from callable import LoxCallable
 class FunctionType(Enum):
     NONE = "NONE"
     FUNCTION = "FUNCTION"
+    METHOD = "METHOD"
 
 
 class Return(Exception):

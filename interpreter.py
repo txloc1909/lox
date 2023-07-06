@@ -124,7 +124,13 @@ class Interpreter:
 
     def visit_ClassStmt(self, stmt: ClassStmt):
         self._env.define(stmt.name.lexeme, None)
-        self._env.assign(stmt.name, LoxClass(stmt.name.lexeme))
+
+        methods: dict[str, LoxFunction] = {
+            m.name.lexeme : LoxFunction(m, closure=self._env)
+            for m in stmt.methods
+        }
+
+        self._env.assign(stmt.name, LoxClass(stmt.name.lexeme, methods))
 
     def visit_VarExpr(self, expr: VarExpr):
         return self._lookup_variable(expr.name, expr)

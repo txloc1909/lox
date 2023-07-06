@@ -1,8 +1,9 @@
-from typing import Any
+from typing import Any, Optional
 from dataclasses import dataclass, field
 
 from _token import Token
 from callable import LoxCallable
+from function import LoxFunction
 from error_handling import LoxRuntimeError
 
 
@@ -15,9 +16,11 @@ class LoxInstance:
         return f"{self._class.name} instance"
 
     def get(self, name: Token) -> Any:
-        try:
+        if name.lexeme in self._fields:
             return self._fields[name.lexeme]
-        except KeyError:
+        elif method := self._class.find_method(name.lexeme):
+            return method
+        else:
             raise LoxRuntimeError(name, f"Undefine property {name.lexeme}.")
 
     def set(self, name: Token, value: Any):
@@ -27,6 +30,7 @@ class LoxInstance:
 @dataclass
 class LoxClass(LoxCallable):
     name: str
+    methods: dict[str, LoxFunction] = field(default_factory=dict)
 
     def __repr__(self):
         return self.name
@@ -36,3 +40,6 @@ class LoxClass(LoxCallable):
 
     def arity(self) -> int:
         return 0
+
+    def find_method(self, name: str) -> Optional[LoxFunction]:
+        return self.methods.get(name, None)
