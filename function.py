@@ -40,3 +40,8 @@ class LoxFunction(LoxCallable):
 
     def __repr__(self) -> str:
         return f"<fn {self._declaration.name.lexeme}>"
+
+    def bind(self, instance):
+        env = Environment(enclosing=self._closure)
+        env.define("this", instance)
+        return LoxFunction(self._declaration, closure=env)

@@ -2,7 +2,8 @@ from typing import Optional
 
 from _token import TokenType, Token
 from expr import (Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr,
-                  VarExpr, AssignExpr, LogicalExpr, CallExpr, GetExpr, SetExpr)
+                  VarExpr, AssignExpr, LogicalExpr, CallExpr, GetExpr, SetExpr,
+                  ThisExpr)
 from stmt import (Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt, IfStmt,
                   WhileStmt, FunctionStmt, ReturnStmt, ClassStmt)
 from error_handling import report
@@ -307,6 +308,8 @@ class Parser:
             return LiteralExpr(None)
         elif self._match(TokenType.NUMBER, TokenType.STRING):
             return LiteralExpr(self._prev().literal)
+        elif self._match(TokenType.THIS):
+            return ThisExpr(self._prev())
         elif self._match(TokenType.IDENTIFIER):
             return VarExpr(self._prev())
         elif self._match(TokenType.LEFT_PAREN):

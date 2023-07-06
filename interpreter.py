@@ -2,7 +2,8 @@ import time
 
 from _token import Token, TokenType
 from expr import (Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr,
-                  VarExpr, AssignExpr, LogicalExpr, CallExpr, GetExpr, SetExpr)
+                  VarExpr, AssignExpr, LogicalExpr, CallExpr, GetExpr, SetExpr,
+                  ThisExpr)
 from stmt import (Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt, IfStmt,
                   WhileStmt, FunctionStmt, ReturnStmt, ClassStmt)
 from visitor import Visitor
@@ -148,6 +149,9 @@ class Interpreter:
 
     def visit_LiteralExpr(self, expr: LiteralExpr):
         return expr.value
+
+    def visit_ThisExpr(self, expr: ThisExpr):
+        return self._lookup_variable(expr.keyword, expr)
 
     def visit_GroupingExpr(self, expr: GroupingExpr):
         return self.evaluate(expr.inner)

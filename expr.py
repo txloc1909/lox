@@ -68,3 +68,8 @@ class SetExpr(Expr):
     obj: Expr
     name: Token
     value: Expr
+
+
+@dataclass(frozen=True, slots=True)
+class ThisExpr(Expr):
+    keyword: Token

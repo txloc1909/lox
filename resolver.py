@@ -1,10 +1,12 @@
 from _token import Token
 from expr import (Expr, VarExpr, AssignExpr, BinaryExpr, CallExpr, GroupingExpr,
-                  LiteralExpr, LogicalExpr, UnaryExpr, GetExpr, SetExpr)
+                  LiteralExpr, LogicalExpr, UnaryExpr, GetExpr, SetExpr,
+                  ThisExpr)
 from stmt import (Stmt, BlockStmt, VarStmt, FunctionStmt, ExpressionStmt, IfStmt,
                   PrintStmt, WhileStmt, ReturnStmt, ClassStmt)
 from visitor import Visitor
 from function import FunctionType
+from _class import ClassType
 from error_handling import LoxRuntimeError
 
 
@@ -14,6 +16,7 @@ class Resolver:
         self.interpreter = interpreter
         self._scopes: list[dict[str, bool]] = []
         self._curr_func = FunctionType.NONE
+        self._curr_class = ClassType.NONE
 
     def visit(self, visitee: Expr | Stmt):
         try:
@@ -68,12 +71,20 @@ class Resolver:
         self._resolve(stmt.body)
 
     def visit_ClassStmt(self, stmt: ClassStmt):
+        enclosing_class = self._curr_class
+        self._curr_class = ClassType.CLASS
+
         self._declare(stmt.name)
         self._define(stmt.name)
 
+        self._begin_scope()
+        self._scopes[-1]["this"] = True
         for method in stmt.methods:
             self._resolve_function(function=method,
                                    func_type=FunctionType.METHOD)
+        self._end_scope()
+
+        self._curr_class = enclosing_class
 
     def visit_VarExpr(self, expr: VarExpr):
         if self._scopes and (expr.name.lexeme in self._scopes[-1]) \
@@ -109,6 +120,12 @@ class Resolver:
 
     def visit_LiteralExpr(self, expr: LiteralExpr):
         pass
+
+    def visit_ThisExpr(self, expr: ThisExpr):
+        if self._curr_class is ClassType.NONE:
+            raise LoxRuntimeError(expr.keyword, "Cannot use 'this' outside of a class.")
+
+        self._resolve_local(expr, expr.keyword)
 
     def visit_LogicalExpr(self, expr: LogicalExpr):
         self._resolve(expr.left)
