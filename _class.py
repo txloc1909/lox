@@ -10,12 +10,14 @@ from error_handling import LoxRuntimeError
 
 class ClassType(Enum):
     CLASS = "CLASS"
+    SUBCLASS = "SUBCLASS"
     NONE = "NONE"
 
 
 @dataclass
 class LoxClass(LoxCallable):
     name: str
+    superclass: "LoxClass" = field(default=None)
     methods: dict[str, LoxFunction] = field(default_factory=dict)
 
     def __repr__(self):
@@ -34,7 +36,12 @@ class LoxClass(LoxCallable):
         return initializer.arity() if initializer else 0
 
     def find_method(self, name: str) -> Optional[LoxFunction]:
-        return self.methods.get(name, None)
+        if name in self.methods:
+            return self.methods[name]
+        elif self.superclass:
+            return self.superclass.find_method(name)
+        else:
+            return None
 
 
 @dataclass

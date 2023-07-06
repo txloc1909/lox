@@ -3,7 +3,7 @@ from typing import Optional
 from _token import TokenType, Token
 from expr import (Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr,
                   VarExpr, AssignExpr, LogicalExpr, CallExpr, GetExpr, SetExpr,
-                  ThisExpr)
+                  ThisExpr, SuperExpr)
 from stmt import (Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt, IfStmt,
                   WhileStmt, FunctionStmt, ReturnStmt, ClassStmt)
 from error_handling import report
@@ -100,12 +100,19 @@ class Parser:
 
     def _class_declaration(self):
         name = self._consume(TokenType.IDENTIFIER, "Expect class name.")
+
+        if self._match(TokenType.LESS):
+            self._consume(TokenType.IDENTIFIER, "Expect superclass name.")
+            superclass = VarExpr(self._prev())
+        else:
+            superclass = None
+
         self._consume(TokenType.LEFT_BRACE, "Expect '{' before class body.")
         methods: list[FunctionStmt] = []
         while not self._check(TokenType.RIGHT_BRACE) and not self._at_end():
             methods.append(self._func_declaration(kind="method"))
         self._consume(TokenType.RIGHT_BRACE, "Expect '}' before class body.")
-        return ClassStmt(name, methods)
+        return ClassStmt(name, superclass, methods)
 
 
     def _block_stmt(self) -> list[Stmt]:
@@ -308,6 +315,11 @@ class Parser:
             return LiteralExpr(None)
         elif self._match(TokenType.NUMBER, TokenType.STRING):
             return LiteralExpr(self._prev().literal)
+        elif self._match(TokenType.SUPER):
+            keyword = self._prev()
+            self._consume(TokenType.DOT, "Expect '.' after 'super'.")
+            method = self._consume(TokenType.IDENTIFIER, "Expect superclass method name.")
+            return SuperExpr(keyword, method)
         elif self._match(TokenType.THIS):
             return ThisExpr(self._prev())
         elif self._match(TokenType.IDENTIFIER):

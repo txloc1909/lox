@@ -9,6 +9,10 @@ class Environment:
         self._values: dict[str, Any] = dict()
         self._enclosing = enclosing
 
+    @property
+    def enclosing(self):
+        return self._enclosing
+
     def define(self, name: str, value: Any) -> None:
         self._values[name] = value
 

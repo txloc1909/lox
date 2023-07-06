@@ -73,3 +73,9 @@ class SetExpr(Expr):
 @dataclass(frozen=True, slots=True)
 class ThisExpr(Expr):
     keyword: Token
+
+
+@dataclass(frozen=True, slots=True)
+class SuperExpr(Expr):
+    keyword: Token
+    method: Token

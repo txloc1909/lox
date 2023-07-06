@@ -3,7 +3,7 @@ import time
 from _token import Token, TokenType
 from expr import (Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr,
                   VarExpr, AssignExpr, LogicalExpr, CallExpr, GetExpr, SetExpr,
-                  ThisExpr)
+                  ThisExpr, SuperExpr)
 from stmt import (Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt, IfStmt,
                   WhileStmt, FunctionStmt, ReturnStmt, ClassStmt)
 from visitor import Visitor
@@ -124,7 +124,18 @@ class Interpreter:
         raise Return(value)
 
     def visit_ClassStmt(self, stmt: ClassStmt):
+        if stmt.superclass:
+            superclass = self.evaluate(stmt.superclass)
+            if not isinstance(superclass, LoxClass):
+                raise LoxRuntimeError(stmt.superclass.name,
+                                      "Superclass must be a class.")
+        else:
+            superclass = None
+
         self._env.define(stmt.name.lexeme, None)
+        if stmt.superclass:
+            self._env = Environment(enclosing=self._env)
+            self._env.define("super", superclass)
 
         methods: dict[str, LoxFunction] = {
             method.name.lexeme : LoxFunction(
@@ -135,7 +146,11 @@ class Interpreter:
             for method in stmt.methods
         }
 
-        self._env.assign(stmt.name, LoxClass(stmt.name.lexeme, methods))
+        _class = LoxClass(stmt.name.lexeme, superclass, methods)
+        if stmt.superclass:
+            self._env = self._env.enclosing
+
+        self._env.assign(stmt.name, _class)
 
     def visit_VarExpr(self, expr: VarExpr):
         return self._lookup_variable(expr.name, expr)
@@ -259,6 +274,14 @@ class Interpreter:
 
         obj.set(expr.name, value)
         return value
+
+    def visit_SuperExpr(self, expr: SuperExpr):
+        distance = self._locals.get(expr)
+        superclass = self._env.get_at(distance, "super")
+        obj = self._env.get_at(distance - 1, "this")    # the env where `this` is bound is always right inside the env where `super` are stored
+        if not (method := superclass.find_method(expr.method.lexeme)):
+            raise LoxRuntimeError(expr.method, f"Undefined property {expr.method.lexeme}.")
+        return method.bind(obj)
 
     def execute_block(self, statements: list[Stmt], env: Environment):
         # NOTE: use context manager, probably?

@@ -1,7 +1,7 @@
 from _token import Token
 from expr import (Expr, VarExpr, AssignExpr, BinaryExpr, CallExpr, GroupingExpr,
                   LiteralExpr, LogicalExpr, UnaryExpr, GetExpr, SetExpr,
-                  ThisExpr)
+                  ThisExpr, SuperExpr)
 from stmt import (Stmt, BlockStmt, VarStmt, FunctionStmt, ExpressionStmt, IfStmt,
                   PrintStmt, WhileStmt, ReturnStmt, ClassStmt)
 from visitor import Visitor
@@ -78,7 +78,15 @@ class Resolver:
 
         self._declare(stmt.name)
         self._define(stmt.name)
+        if stmt.superclass and stmt.name.lexeme == stmt.superclass.name.lexeme:
+            raise LoxRuntimeError(stmt.superclass.name, "A class cannot inherit from itself.")
+        if stmt.superclass:
+            self._curr_class = ClassType.SUBCLASS
+            self._resolve(stmt.superclass)
 
+        if stmt.superclass:
+            self._begin_scope()
+            self._scopes[-1]["super"] = True
         self._begin_scope()
         self._scopes[-1]["this"] = True
         for method in stmt.methods:
@@ -88,6 +96,8 @@ class Resolver:
                 declaration = FunctionType.METHOD
             self._resolve_function(method, declaration)
         self._end_scope()
+        if stmt.superclass:
+            self._end_scope()
 
         self._curr_class = enclosing_class
 
@@ -119,6 +129,16 @@ class Resolver:
     def visit_SetExpr(self, expr: SetExpr):
         self._resolve(expr.value)
         self._resolve(expr.obj)
+
+    def visit_SuperExpr(self, expr: SuperExpr):
+        match self._curr_class:
+            case ClassType.SUBCLASS:
+                self._resolve_local(expr, expr.keyword)
+                return
+            case ClassType.NONE:
+                raise LoxRuntimeError(expr.keyword, "Cannot use 'super' outside of a class.")
+            case ClassType.CLASS:
+                raise LoxRuntimeError(expr.keyword, "Cannot use 'super' in a class with no superclass")
 
     def visit_GroupingExpr(self, expr: GroupingExpr):
         self._resolve(expr.inner)

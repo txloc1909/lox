@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from _token import Token
-from expr import Expr
+from expr import Expr, VarExpr
 from visitor import Visitor
 
 
@@ -61,4 +61,5 @@ class ReturnStmt(Stmt):
 @dataclass(frozen=True, slots=True)
 class ClassStmt(Stmt):
     name: Token
+    superclass: VarExpr
     methods: list[FunctionStmt]
