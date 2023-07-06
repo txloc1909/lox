@@ -22,10 +22,16 @@ class LoxClass(LoxCallable):
         return self.name
 
     def call(self, interpreter, *arguments) -> "LoxInstance":
-        return LoxInstance(_class=self)
+        instance = LoxInstance(_class=self)
+        initializer = self.find_method("init")
+        if initializer:
+            initializer.bind(instance).call(interpreter, *arguments)
+
+        return instance
 
     def arity(self) -> int:
-        return 0
+        initializer = self.find_method("init")
+        return initializer.arity() if initializer else 0
 
     def find_method(self, name: str) -> Optional[LoxFunction]:
         return self.methods.get(name, None)

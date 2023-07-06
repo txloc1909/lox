@@ -52,6 +52,8 @@ class Resolver:
         if self._curr_func is FunctionType.NONE:
             raise LoxRuntimeError(stmt.keyword, "Cannot return from top-level code.")
         if stmt.value:
+            if self._curr_func is FunctionType.INITIALIZER:
+                raise LoxRuntimeError(stmt.keyword, "Cannot return value from initializer.")
             self._resolve(stmt.value)
 
     def visit_ExpressionStmt(self, stmt: ExpressionStmt):
@@ -80,8 +82,11 @@ class Resolver:
         self._begin_scope()
         self._scopes[-1]["this"] = True
         for method in stmt.methods:
-            self._resolve_function(function=method,
-                                   func_type=FunctionType.METHOD)
+            if method.name.lexeme == "init":
+                declaration = FunctionType.INITIALIZER
+            else:
+                declaration = FunctionType.METHOD
+            self._resolve_function(method, declaration)
         self._end_scope()
 
         self._curr_class = enclosing_class

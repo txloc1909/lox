@@ -127,8 +127,12 @@ class Interpreter:
         self._env.define(stmt.name.lexeme, None)
 
         methods: dict[str, LoxFunction] = {
-            m.name.lexeme : LoxFunction(m, closure=self._env)
-            for m in stmt.methods
+            method.name.lexeme : LoxFunction(
+                declaration=method,
+                closure=self._env,
+                is_initializer=(method.name.lexeme == "init")
+                )
+            for method in stmt.methods
         }
 
         self._env.assign(stmt.name, LoxClass(stmt.name.lexeme, methods))

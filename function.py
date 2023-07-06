@@ -9,6 +9,7 @@ class FunctionType(Enum):
     NONE = "NONE"
     FUNCTION = "FUNCTION"
     METHOD = "METHOD"
+    INITIALIZER = "INITIALIZER"
 
 
 class Return(Exception):
@@ -19,9 +20,11 @@ class Return(Exception):
 
 class LoxFunction(LoxCallable):
 
-    def __init__(self, declaration: FunctionStmt, closure: Environment):
+    def __init__(self, declaration: FunctionStmt, closure: Environment,
+                 is_initializer: bool = False):
         self._declaration = declaration
         self._closure = closure
+        self._is_initializer = is_initializer
 
     def arity(self) -> int:
         return len(self._declaration.params)
@@ -36,7 +39,13 @@ class LoxFunction(LoxCallable):
         try:
             intepreter.execute_block(self._declaration.body, env)
         except Return as _return:
+            if self._is_initializer:
+                # `init` method always return `this`
+                return self._closure.get_at(0, "this")
             return _return.value
+
+        if self._is_initializer:
+            return self._closure.get_at(0, "this")
 
     def __repr__(self) -> str:
         return f"<fn {self._declaration.name.lexeme}>"
@@ -44,4 +53,6 @@ class LoxFunction(LoxCallable):
     def bind(self, instance):
         env = Environment(enclosing=self._closure)
         env.define("this", instance)
-        return LoxFunction(self._declaration, closure=env)
+        return LoxFunction(self._declaration,
+                           closure=env,
+                           is_initializer=self._is_initializer)
