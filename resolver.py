@@ -1,6 +1,6 @@
 from _token import Token
 from expr import (Expr, VarExpr, AssignExpr, BinaryExpr, CallExpr, GroupingExpr,
-                  LiteralExpr, LogicalExpr, UnaryExpr)
+                  LiteralExpr, LogicalExpr, UnaryExpr, GetExpr, SetExpr)
 from stmt import (Stmt, BlockStmt, VarStmt, FunctionStmt, ExpressionStmt, IfStmt,
                   PrintStmt, WhileStmt, ReturnStmt, ClassStmt)
 from visitor import Visitor
@@ -90,6 +90,15 @@ class Resolver:
         self._resolve(expr.callee)
         for arg in expr.arguments:
             self._resolve(arg)
+
+    def visit_GetExpr(self, expr: GetExpr):
+        # since properties are looked up dynamically,
+        # only resolve the left side of the dot
+        self._resolve(expr.obj)
+
+    def visit_SetExpr(self, expr: SetExpr):
+        self._resolve(expr.value)
+        self._resolve(expr.obj)
 
     def visit_GroupingExpr(self, expr: GroupingExpr):
         self._resolve(expr.inner)

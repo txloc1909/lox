@@ -2,13 +2,13 @@ import time
 
 from _token import Token, TokenType
 from expr import (Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr,
-                  VarExpr, AssignExpr, LogicalExpr, CallExpr)
+                  VarExpr, AssignExpr, LogicalExpr, CallExpr, GetExpr, SetExpr)
 from stmt import (Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt, IfStmt,
                   WhileStmt, FunctionStmt, ReturnStmt, ClassStmt)
 from visitor import Visitor
 from callable import LoxCallable
 from function import LoxFunction, Return
-from _class import LoxClass
+from _class import LoxClass, LoxInstance
 from environment import Environment
 from error_handling import LoxRuntimeError
 
@@ -228,6 +228,23 @@ class Interpreter:
             raise LoxRuntimeError(expr.paren, f"Expected {f_arity} arguments but got {n_arguments}.")
 
         return callee.call(self, *arguments)
+
+    def visit_GetExpr(self, expr: GetExpr):
+        obj = self.evaluate(expr.obj)
+        if isinstance(obj, LoxInstance):
+            return obj.get(expr.name)
+
+        raise LoxRuntimeError(expr.name, "Only instances have properties")
+
+    def visit_SetExpr(self, expr: SetExpr):
+        obj = self.evaluate(expr.obj)
+        if not isinstance(obj, LoxInstance):
+            raise LoxRuntimeError(expr.name, "Only instances have fields.")
+
+        value = self.evaluate(expr.value)
+
+        obj.set(expr.name, value)
+        return value
 
     def execute_block(self, statements: list[Stmt], env: Environment):
         # NOTE: use context manager, probably?

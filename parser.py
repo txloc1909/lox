@@ -2,7 +2,7 @@ from typing import Optional
 
 from _token import TokenType, Token
 from expr import (Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr,
-                  VarExpr, AssignExpr, LogicalExpr, CallExpr)
+                  VarExpr, AssignExpr, LogicalExpr, CallExpr, GetExpr, SetExpr)
 from stmt import (Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt, IfStmt,
                   WhileStmt, FunctionStmt, ReturnStmt, ClassStmt)
 from error_handling import report
@@ -192,8 +192,9 @@ class Parser:
             value = self._assignment()
 
             if isinstance(expr, VarExpr):
-                name = expr.name
-                return AssignExpr(name, value)
+                return AssignExpr(expr.name, value)
+            elif isinstance(expr, GetExpr):
+                return SetExpr(expr.obj, expr.name, value)
             else:
                 raise ParserError(equals, "Invalid assignment target.")
         else:
@@ -276,7 +277,10 @@ class Parser:
         while True:
             if self._match(TokenType.LEFT_PAREN):
                 expr = self._finish_call(expr)
-            else:       # will expand later to handle object's properties
+            elif self._match(TokenType.DOT):
+                name = self._consume(TokenType.IDENTIFIER, "Expect property name after '.'.")
+                expr = GetExpr(expr, name)
+            else:
                 break
 
         return expr

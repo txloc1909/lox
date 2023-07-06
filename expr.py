@@ -55,3 +55,16 @@ class CallExpr(Expr):
     callee: Expr
     paren: Token    # store the closing paren, for error handling
     arguments: list[Expr]
+
+
+@dataclass(frozen=True, slots=True)
+class GetExpr(Expr):
+    obj: Expr
+    name: Token
+
+
+@dataclass(frozen=True, slots=True)
+class SetExpr(Expr):
+    obj: Expr
+    name: Token
+    value: Expr
