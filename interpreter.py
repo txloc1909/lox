@@ -277,8 +277,10 @@ class Interpreter:
 
     def visit_SuperExpr(self, expr: SuperExpr):
         distance = self._locals.get(expr)
+        assert distance
         superclass = self._env.get_at(distance, "super")
         obj = self._env.get_at(distance - 1, "this")    # the env where `this` is bound is always right inside the env where `super` are stored
+        assert obj
         if not (method := superclass.find_method(expr.method.lexeme)):
             raise LoxRuntimeError(expr.method, f"Undefined property {expr.method.lexeme}.")
         return method.bind(obj)

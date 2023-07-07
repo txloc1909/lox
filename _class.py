@@ -17,7 +17,7 @@ class ClassType(Enum):
 @dataclass
 class LoxClass(LoxCallable):
     name: str
-    superclass: "LoxClass" = field(default=None)
+    superclass: Optional["LoxClass"] = field(default=None)
     methods: dict[str, LoxFunction] = field(default_factory=dict)
 
     def __repr__(self):

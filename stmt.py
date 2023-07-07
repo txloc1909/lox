@@ -61,5 +61,5 @@ class ReturnStmt(Stmt):
 @dataclass(frozen=True, slots=True)
 class ClassStmt(Stmt):
     name: Token
-    superclass: VarExpr
+    superclass: Optional[VarExpr]
     methods: list[FunctionStmt]
