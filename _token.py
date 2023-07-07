@@ -53,6 +53,8 @@ class TokenType(Enum):
     EOF = 'EOF'
 
 
+# TODO: implement cursor for scanner -> record token's column number
+# -> enable equality & hashing
 @dataclass(eq=False, frozen=True, slots=True)
 class Token:
     type_: TokenType
