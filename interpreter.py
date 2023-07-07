@@ -11,7 +11,7 @@ from callable import LoxCallable
 from function import LoxFunction, Return
 from _class import LoxClass, LoxInstance
 from environment import Environment
-from error_handling import LoxRuntimeError
+from error_handling import LoxRuntimeError, runtime_error
 
 
 def check_number_operand(operator: Token, operand):
@@ -82,7 +82,7 @@ class Interpreter:
             for s in statements:
                 self.execute(s)
         except LoxRuntimeError as e:
-            print(e)
+            runtime_error(e)
 
     def visit(self, visitee: Expr | Stmt):
         return getattr(self, f"visit_{type(visitee).__name__}")(visitee)

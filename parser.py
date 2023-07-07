@@ -6,16 +6,12 @@ from expr import (Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr,
                   ThisExpr, SuperExpr)
 from stmt import (Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt, IfStmt,
                   WhileStmt, FunctionStmt, ReturnStmt, ClassStmt)
-from error_handling import report
+from error_handling import error, ParserError
 
 
-class ParserError(RuntimeError):
-    def __init__(self, token: Token, message: str):
-        super().__init__(message)
-        if token.type_ == TokenType.EOF:
-            report(token.line, " at end", message)
-        else:
-            report(token.line, f"at '{token.lexeme}'", message)
+def _parser_error(token: Token, message: str):
+    error(at=token, message=message)
+    return ParserError()
 
 
 class Parser:
@@ -27,8 +23,7 @@ class Parser:
         statements: list[Stmt] = []
 
         while not self._at_end():
-            stmt = self._declaration()
-            if stmt:
+            if stmt := self._declaration():
                 statements.append(stmt)
 
         return statements
@@ -87,7 +82,7 @@ class Parser:
         if not self._check(TokenType.RIGHT_PAREN):
             while True:
                 if len(parameters) >= 255:
-                    raise ParserError(self._peek(), "Can't have more than 255 parameters.")
+                    _parser_error(self._peek(), "Can't have more than 255 parameters.")
 
                 parameters.append(self._consume(TokenType.IDENTIFIER, "Expect parameter name."))
                 if not self._match(TokenType.COMMA):
@@ -204,7 +199,7 @@ class Parser:
             elif isinstance(expr, GetExpr):
                 return SetExpr(expr.obj, expr.name, value)
             else:
-                raise ParserError(equals, "Invalid assignment target.")
+                _parser_error(equals, "Invalid assignment target.")
         else:
             return expr
 
@@ -298,7 +293,7 @@ class Parser:
         if not self._check(TokenType.RIGHT_PAREN):
             while True:
                 if len(arguments) >= 255:
-                    raise ParserError(self._peek(), "Can't have more than 255 arguments.")
+                    _parser_error(self._peek(), "Can't have more than 255 arguments.")
                 arguments.append(self._expression());
                 if not self._match(TokenType.COMMA):
                     break
@@ -329,7 +324,7 @@ class Parser:
             self._consume(TokenType.RIGHT_PAREN, "Expect ')' after expression")
             return GroupingExpr(expr)
         else:
-            raise ParserError(self._peek(), "Expect expression.")
+            raise _parser_error(self._peek(), "Expect expression.")
 
     def _synchronize(self):
         self._advance()
@@ -384,4 +379,4 @@ class Parser:
         if self._check(type_):
             return self._advance()
 
-        raise ParserError(token=self._peek(), message=message)
+        raise _parser_error(token=self._peek(), message=message)

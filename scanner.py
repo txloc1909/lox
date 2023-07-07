@@ -100,7 +100,7 @@ class Scanner:
             elif char.isalpha():
                 self._scan_identifier()
             else:
-                error(self._line, f"Unexpected character: {char}")
+                error(at=self._line, message=f"Unexpected character: {char}")
 
     def _at_end(self) -> bool:
         return self._current >= len(self._src)
@@ -137,7 +137,7 @@ class Scanner:
             self._advance()
 
         if self._at_end():
-            error(self._line, "Unterminated string.")
+            error(at=self._line, message="Unterminated string.")
             return
 
         self._advance()             # The closing \"
