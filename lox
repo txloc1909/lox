@@ -6,57 +6,57 @@ import error_handling
 from scanner import Scanner
 from parser import Parser
 from resolver import Resolver
-# from ast_printer import ASTPrinter
 from interpreter import Interpreter
 
 
-def run(interpreter: Interpreter, src: str):
-    scanner = Scanner(src)
-    tokens = scanner.scan_tokens()
-    parser = Parser(tokens)
-    statements = parser.parse()
+class PyLox:
+    def __init__(self):
+        self.interpreter = Interpreter()
+        self.resolver = Resolver(self.interpreter)
+        # self._has_error = False
+        # self._has_runtime_error = False
 
-    if error_handling.HAS_ERROR:
-        return
+    def run(self, src: str):
+        tokens = Scanner(src).scan_tokens()
+        statements = Parser(tokens).parse()
 
-    resolver = Resolver(interpreter)
-    resolver.resolve(statements)
-    if error_handling.HAS_ERROR:
-        return
+        if error_handling.HAS_ERROR:
+            return
 
-    interpreter.interpret(statements)
+        self.resolver.resolve(statements)
+        if error_handling.HAS_ERROR:
+            return
 
+        self.interpreter.interpret(statements)
 
-def run_file(interpreter, fname):
-    run(interpreter, open(fname).read())
-    if error_handling.HAS_ERROR:
-        sys.exit(65)
-    if error_handling.HAS_RUNTIME_ERROR:
-        sys.exit(70)
+    def run_file(self, fname):
+        self.run(open(fname).read())
+        if error_handling.HAS_ERROR:
+            sys.exit(65)
+        if error_handling.HAS_RUNTIME_ERROR:
+            sys.exit(70)
 
+    def run_prompt(self):
+        while True:
+            try:
+                line = input(">>> ")
+            except EOFError:
+                # Ctrl-D exit the REPL
+                break
 
-def run_prompt(interpreter):
-    while True:
-        try:
-            line = input(">>> ")
-        except EOFError:
-            # CTRL-D exit the interpreter
-            break
-
-        if line:
-            run(interpreter, line)
-            error_handling.HAS_ERROR = False
+            if line:
+                self.run(line)
+                error_handling.HAS_ERROR = False
 
 
 def main(args):
-    interpreter = Interpreter()
     if len(args) > 2:
         print("Usage: ./lox [script]")
         sys.exit(65)
     elif len(args) == 2:
-        run_file(interpreter, args[1])
+        PyLox().run_file(args[1])
     else:
-        run_prompt(interpreter)
+        PyLox().run_prompt()
 
 
 if __name__ == "__main__":
