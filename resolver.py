@@ -7,13 +7,14 @@ from stmt import (Stmt, BlockStmt, VarStmt, FunctionStmt, ExpressionStmt, IfStmt
 from visitor import Visitor
 from function import FunctionType
 from _class import ClassType
-from error_handling import LoxRuntimeError, error
+from error_handling import LoxRuntimeError, ErrorHandler
 
 
 class Resolver:
 
-    def __init__(self, interpreter):
+    def __init__(self, interpreter, error_handler: ErrorHandler):
         self.interpreter = interpreter
+        self._handler = error_handler
         self._scopes: list[dict[str, bool]] = []
         self._curr_func = FunctionType.NONE
         self._curr_class = ClassType.NONE
@@ -50,12 +51,14 @@ class Resolver:
 
     def visit_ReturnStmt(self, stmt: ReturnStmt):
         if self._curr_func is FunctionType.NONE:
-            error(at=stmt.keyword,
-                  message="Cannot return from top-level code.")
+            self._handler.error(at=stmt.keyword,
+                                message="Cannot return from top-level code.")
         if stmt.value:
             if self._curr_func is FunctionType.INITIALIZER:
-                error(at=stmt.keyword,
-                      message="Cannot return value from initializer.")
+                self._handler.error(
+                    at=stmt.keyword,
+                    message="Cannot return value from initializer."
+                )
             self._resolve(stmt.value)
 
     def visit_ExpressionStmt(self, stmt: ExpressionStmt):
@@ -81,8 +84,8 @@ class Resolver:
         self._declare(stmt.name)
         self._define(stmt.name)
         if stmt.superclass and stmt.name.lexeme == stmt.superclass.name.lexeme:
-            error(at=stmt.superclass.name,
-                  message="A class cannot inherit from itself.")
+            self._handler.error(at=stmt.superclass.name,
+                                message="A class cannot inherit from itself.")
         if stmt.superclass:
             self._curr_class = ClassType.SUBCLASS
             self._resolve(stmt.superclass)
@@ -107,8 +110,10 @@ class Resolver:
     def visit_VarExpr(self, expr: VarExpr):
         if self._scopes and (expr.name.lexeme in self._scopes[-1]) \
                 and (not self._scopes[-1][expr.name.lexeme]):
-            error(at=expr.name,
-                  message="Can't read local variable in its own initializer.")
+            self._handler.error(
+                at=expr.name,
+                message="Can't read local variable in its own initializer."
+            )
 
         self._resolve_local(expr, expr.name)
 
@@ -139,9 +144,11 @@ class Resolver:
             case ClassType.SUBCLASS:
                 self._resolve_local(expr, expr.keyword)
             case ClassType.NONE:
-                error(expr.keyword, "Cannot use 'super' outside of a class.")
+                self._handler.error(expr.keyword,
+                                    "Cannot use 'super' outside of a class.")
             case ClassType.CLASS:
-                error(expr.keyword, "Cannot use 'super' in a class with no superclass")
+                self._handler.error(expr.keyword,
+                                    "Cannot use 'super' in a class with no superclass")
 
     def visit_GroupingExpr(self, expr: GroupingExpr):
         self._resolve(expr.inner)
@@ -151,8 +158,8 @@ class Resolver:
 
     def visit_ThisExpr(self, expr: ThisExpr):
         if self._curr_class is ClassType.NONE:
-            error(at=expr.keyword,
-                  message="Cannot use 'this' outside of a class.")
+            self._handler.error(at=expr.keyword,
+                                message="Cannot use 'this' outside of a class.")
 
         self._resolve_local(expr, expr.keyword)
 
@@ -190,8 +197,10 @@ class Resolver:
 
         scope = self._scopes[-1]
         if name.lexeme in scope:
-            error(at=name,
-                  message="Already a variable with this name in this scope")
+            self._handler.error(
+                at=name,
+                message="Already a variable with this name in this scope"
+            )
 
         scope[name.lexeme] = False
 

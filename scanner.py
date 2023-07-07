@@ -1,7 +1,7 @@
 from collections.abc import Mapping
 
 from _token import TokenType, Token
-from error_handling import error
+from error_handling import ErrorHandler
 
 _KEYWORDS: Mapping[str, TokenType] = {
         "and" :         TokenType.AND,
@@ -24,12 +24,13 @@ _KEYWORDS: Mapping[str, TokenType] = {
 
 
 class Scanner:
-    def __init__(self, src: str):
+    def __init__(self, src: str, error_handler: ErrorHandler):
         self._src: str = src
         self._start: int = 0
         self._current: int = 0
         self._line: int = 1
         self._tokens: list[Token] = []
+        self._handler = error_handler
 
     def scan_tokens(self) -> list[Token]:
         while not self._at_end():
@@ -100,7 +101,8 @@ class Scanner:
             elif char.isalpha():
                 self._scan_identifier()
             else:
-                error(at=self._line, message=f"Unexpected character: {char}")
+                self._handler.error(at=self._line,
+                                    message=f"Unexpected character: {char}")
 
     def _at_end(self) -> bool:
         return self._current >= len(self._src)
@@ -137,7 +139,7 @@ class Scanner:
             self._advance()
 
         if self._at_end():
-            error(at=self._line, message="Unterminated string.")
+            self._handler.error(at=self._line, message="Unterminated string.")
             return
 
         self._advance()             # The closing \"
