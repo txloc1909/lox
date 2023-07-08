@@ -9,7 +9,7 @@ DEPENDS := $(patsubst %.c,%.d,$(SOURCES))
 
 .PHONY: all clean run
 
-all: clox
+all: run
 
 clean:
 	rm $(OBJECTS0) $(DEPENDS) clox
