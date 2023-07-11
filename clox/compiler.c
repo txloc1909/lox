@@ -49,6 +49,8 @@ const char* precedence_str[] = {
 
 #define PREC2STR(prec) precedence_str[(int)(prec)]
 
+int _callstackLevel = 0;
+
 #endif
 
 typedef void (*ParseFn)();
@@ -151,7 +153,8 @@ static void parsePrecedence(Precedence precedence);
 static void binary() {
 #ifdef DEBUG_TRACE_PARSER
     Token operator = parser.previous;
-    fprintf(stderr, "[Parser] Start binary: operator %.*s\n", operator.length, operator.start);
+    fprintf(stderr, "%*s[Parser] Start binary: operator %.*s\n",
+            _callstackLevel, "", operator.length, operator.start);
 #endif
     TokenType operatorType = parser.previous.type;
     ParseRule* rule = getRule(operatorType);
@@ -165,62 +168,84 @@ static void binary() {
         default: return;                // unreachable
     }
 #ifdef DEBUG_TRACE_PARSER
-    fprintf(stderr, "[Parser] Start binary: operator %.*s\n", operator.length, operator.start);
+    fprintf(stderr, "%*s[Parser] End binary: operator %.*s\n",
+            _callstackLevel, "", operator.length, operator.start);
 #endif
 }
 
 static void parsePrecedence(Precedence precedence) {
 #ifdef DEBUG_TRACE_PARSER
-    fprintf(stderr, "[Parser] parse precedence: [%d] %s\n", (int)precedence,
-            PREC2STR(precedence));
+    _callstackLevel++;
+    fprintf(stderr, "%*s[Parser] parse precedence: [%d] %s\n",
+            _callstackLevel, "", (int)precedence, PREC2STR(precedence));
 #endif
+
     advance();
     ParseFn prefixRule = getRule(parser.previous.type)->prefix;
     if (prefixRule == NULL) {
         error("Expect expression.");
     }
+
 #ifdef DEBUG_TRACE_PARSER
-    fprintf(stderr, "[Parser] precedence [%d] %s call to prefix:\n",
-            (int)precedence, PREC2STR(precedence));
+    fprintf(stderr, "%*s[Parser] precedence [%d] %s call to prefix:\n",
+            _callstackLevel, "", (int)precedence, PREC2STR(precedence));
+    _callstackLevel++;
 #endif
 
     prefixRule();
+
+#ifdef DEBUG_TRACE_PARSER
+    _callstackLevel--;
+#endif
+
     while (precedence <= getRule(parser.current.type)->precedence) {
         advance();
         ParseFn infixRule = getRule(parser.previous.type)->infix;
+
 #ifdef DEBUG_TRACE_PARSER
-        fprintf(stderr, "[Parser] precedence [%d] %s call to infix:\n",
-                (int)precedence, PREC2STR(precedence));
+        fprintf(stderr, "%*s[Parser] precedence [%d] %s call to infix:\n",
+                _callstackLevel, "", (int)precedence, PREC2STR(precedence));
+        _callstackLevel++;
 #endif
+
         infixRule();
+
+#ifdef DEBUG_TRACE_PARSER
+        _callstackLevel--;
+#endif
+
     }
+#ifdef DEBUG_TRACE_PARSER
+    _callstackLevel--;
+#endif
 }
 
 static void expression() {
 #ifdef DEBUG_TRACE_PARSER
-    fprintf(stderr, "[Parser] Start expression\n");
+    fprintf(stderr, "%*s[Parser] Start expression\n", _callstackLevel, "");
 #endif
     parsePrecedence(PREC_ASSIGNMENT);
 #ifdef DEBUG_TRACE_PARSER
-    fprintf(stderr, "[Parser] End expression\n");
+    fprintf(stderr, "%*s[Parser] End expression\n", _callstackLevel, "");
 #endif
 }
 
 static void grouping() {
 #ifdef DEBUG_TRACE_PARSER
-    fprintf(stderr, "[Parser] Start grouping (\n");
+    fprintf(stderr, "%*s[Parser] Start grouping (\n", _callstackLevel, "");
 #endif
     expression();
     consume(TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
 #ifdef DEBUG_TRACE_PARSER
-    fprintf(stderr, "[Parser] End grouping )\n");
+    fprintf(stderr, "%*s[Parser] End grouping )\n", _callstackLevel, "");
 #endif
 }
 
 static void number() {
 #ifdef DEBUG_TRACE_PARSER
     Token num = parser.previous;
-    fprintf(stderr, "[Parser] number: %.2f\n", strtod(num.start, NULL));
+    fprintf(stderr, "%*s[Parser] number: %.2f\n",
+            _callstackLevel, "", strtod(num.start, NULL));
 #endif
     double value = strtod(parser.previous.start, NULL);
     emitConstant(value);
@@ -229,7 +254,8 @@ static void number() {
 static void unary() {
 #ifdef DEBUG_TRACE_PARSER
     Token operator = parser.previous;
-    fprintf(stderr, "[Parser] Start unary: operator: %.*s\n", operator.length, operator.start);
+    fprintf(stderr, "%*s[Parser] Start unary: operator: %.*s\n",
+            _callstackLevel, "", operator.length, operator.start);
 #endif
     TokenType operatorType = parser.previous.type;
     parsePrecedence(PREC_UNARY);        // compile the operand
@@ -239,7 +265,8 @@ static void unary() {
         default: return;                // unreachable
     }
 #ifdef DEBUG_TRACE_PARSER
-    fprintf(stderr, "[Parser] End unary: operator: %.*s\n", operator.length, operator.start);
+    fprintf(stderr, "%*s[Parser] End unary: operator: %.*s\n",
+            _callstackLevel, "", operator.length, operator.start);
 #endif
 }
 
