@@ -23,4 +23,4 @@ clox: $(OBJECTS)
 	$(CC) $(CFLAGS) -MMD -MP -c -o $@ $<
 
 run: clox
-	./clox
+	./clox example.lox

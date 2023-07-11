@@ -32,6 +32,25 @@ typedef enum {
     PREC_PRIMARY,
 } Precedence;
 
+#ifdef DEBUG_TRACE_PARSER
+const char* precedence_str[] = {
+    "PREC_NONE",
+    "PREC_ASSIGNMENT",        // =
+    "PREC_OR",                // or
+    "PREC_AND",               // and
+    "PREC_EQUALITY",          // == !=
+    "PREC_COMPARISON",        // < > <= >=
+    "PREC_TERM",              // + -
+    "PREC_FACTOR",            // * /
+    "PREC_UNARY",             // ! -
+    "PREC_CALL",              // . ()
+    "PREC_PRIMARY",
+};
+
+#define PREC2STR(prec) precedence_str[(int)(prec)]
+
+#endif
+
 typedef void (*ParseFn)();
 
 typedef struct {
@@ -130,6 +149,10 @@ static ParseRule* getRule(TokenType type);
 static void parsePrecedence(Precedence precedence);
 
 static void binary() {
+#ifdef DEBUG_TRACE_PARSER
+    Token operator = parser.previous;
+    fprintf(stderr, "[Parser] Start binary: operator %.*s\n", operator.length, operator.start);
+#endif
     TokenType operatorType = parser.previous.type;
     ParseRule* rule = getRule(operatorType);
     parsePrecedence((Precedence)(rule->precedence + 1));
@@ -141,38 +164,73 @@ static void binary() {
         case TOKEN_SLASH:   emitByte(OP_DIVIDE); break;
         default: return;                // unreachable
     }
+#ifdef DEBUG_TRACE_PARSER
+    fprintf(stderr, "[Parser] Start binary: operator %.*s\n", operator.length, operator.start);
+#endif
 }
 
 static void parsePrecedence(Precedence precedence) {
+#ifdef DEBUG_TRACE_PARSER
+    fprintf(stderr, "[Parser] parse precedence: [%d] %s\n", (int)precedence,
+            PREC2STR(precedence));
+#endif
     advance();
     ParseFn prefixRule = getRule(parser.previous.type)->prefix;
     if (prefixRule == NULL) {
         error("Expect expression.");
     }
+#ifdef DEBUG_TRACE_PARSER
+    fprintf(stderr, "[Parser] precedence [%d] %s call to prefix:\n",
+            (int)precedence, PREC2STR(precedence));
+#endif
 
     prefixRule();
     while (precedence <= getRule(parser.current.type)->precedence) {
         advance();
         ParseFn infixRule = getRule(parser.previous.type)->infix;
+#ifdef DEBUG_TRACE_PARSER
+        fprintf(stderr, "[Parser] precedence [%d] %s call to infix:\n",
+                (int)precedence, PREC2STR(precedence));
+#endif
         infixRule();
     }
 }
 
 static void expression() {
+#ifdef DEBUG_TRACE_PARSER
+    fprintf(stderr, "[Parser] Start expression\n");
+#endif
     parsePrecedence(PREC_ASSIGNMENT);
+#ifdef DEBUG_TRACE_PARSER
+    fprintf(stderr, "[Parser] End expression\n");
+#endif
 }
 
 static void grouping() {
+#ifdef DEBUG_TRACE_PARSER
+    fprintf(stderr, "[Parser] Start grouping (\n");
+#endif
     expression();
     consume(TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
+#ifdef DEBUG_TRACE_PARSER
+    fprintf(stderr, "[Parser] End grouping )\n");
+#endif
 }
 
 static void number() {
+#ifdef DEBUG_TRACE_PARSER
+    Token num = parser.previous;
+    fprintf(stderr, "[Parser] number: %.2f\n", strtod(num.start, NULL));
+#endif
     double value = strtod(parser.previous.start, NULL);
     emitConstant(value);
 }
 
 static void unary() {
+#ifdef DEBUG_TRACE_PARSER
+    Token operator = parser.previous;
+    fprintf(stderr, "[Parser] Start unary: operator: %.*s\n", operator.length, operator.start);
+#endif
     TokenType operatorType = parser.previous.type;
     parsePrecedence(PREC_UNARY);        // compile the operand
 
@@ -180,6 +238,9 @@ static void unary() {
         case TOKEN_MINUS: emitByte(OP_NEGATE); break;
         default: return;                // unreachable
     }
+#ifdef DEBUG_TRACE_PARSER
+    fprintf(stderr, "[Parser] End unary: operator: %.*s\n", operator.length, operator.start);
+#endif
 }
 
 ParseRule rules[] = {
