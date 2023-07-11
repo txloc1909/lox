@@ -176,7 +176,7 @@ static void binary() {
 static void parsePrecedence(Precedence precedence) {
 #ifdef DEBUG_TRACE_PARSER
     _callstackLevel++;
-    fprintf(stderr, "%*s[Parser] parse precedence: [%d] %s\n",
+    fprintf(stderr, "%*s[Parser] Start : [%d] %s\n",
             _callstackLevel, "", (int)precedence, PREC2STR(precedence));
 #endif
 
@@ -187,7 +187,7 @@ static void parsePrecedence(Precedence precedence) {
     }
 
 #ifdef DEBUG_TRACE_PARSER
-    fprintf(stderr, "%*s[Parser] precedence [%d] %s call to prefix:\n",
+    fprintf(stderr, "%*s[Parser] [%d] %s call to prefix:\n",
             _callstackLevel, "", (int)precedence, PREC2STR(precedence));
     _callstackLevel++;
 #endif
@@ -203,7 +203,7 @@ static void parsePrecedence(Precedence precedence) {
         ParseFn infixRule = getRule(parser.previous.type)->infix;
 
 #ifdef DEBUG_TRACE_PARSER
-        fprintf(stderr, "%*s[Parser] precedence [%d] %s call to infix:\n",
+        fprintf(stderr, "%*s[Parser] [%d] %s call to infix:\n",
                 _callstackLevel, "", (int)precedence, PREC2STR(precedence));
         _callstackLevel++;
 #endif
@@ -216,6 +216,8 @@ static void parsePrecedence(Precedence precedence) {
 
     }
 #ifdef DEBUG_TRACE_PARSER
+    fprintf(stderr, "%*s[Parser] End: [%d] %s\n",
+            _callstackLevel, "", (int)precedence, PREC2STR(precedence));
     _callstackLevel--;
 #endif
 }
