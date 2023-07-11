@@ -12,7 +12,7 @@ DEPENDS := $(patsubst %.c,%.d,$(SOURCES))
 all: run
 
 clean:
-	rm $(OBJECTS0) $(DEPENDS) clox
+	rm $(OBJECTS) $(DEPENDS) clox
 
 clox: $(OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
