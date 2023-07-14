@@ -119,6 +119,15 @@ static void emitByte(uint8_t byte) {
     writeChunk(currentChunk(), byte, parser.previous.line);
 }
 
+static void emitLoop(int loopStart) {
+    emitByte(OP_LOOP);
+    int offset = currentChunk()->count - loopStart + 2;
+    if (offset > UINT16_MAX) error("Loop body too large!");
+
+    emitByte((offset >> 8) & 0xff);
+    emitByte(offset & 0xff);
+}
+
 static void emitBytes(uint8_t byte1, uint8_t byte2) {
     emitByte(byte1); emitByte(byte2);
 }
@@ -366,13 +375,13 @@ static void ifStatement() {
     consume(TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
 
     int thenJump = emitJump(OP_JUMP_IF_FALSE);
-    emitByte(OP_POP);               /* pop the condition */
+    emitByte(OP_POP);
 
     statement();
 
     int elseJump = emitJump(OP_JUMP);
     patchJump(thenJump);
-    emitByte(OP_POP);               /* pop the condition */
+    emitByte(OP_POP);
 
     if (match(TOKEN_ELSE)) statement();
     patchJump(elseJump);
@@ -382,6 +391,20 @@ static void printStatement() {
     expression();
     consume(TOKEN_SEMICOLON, "Expect ';' after value.");
     emitByte(OP_PRINT);
+}
+
+static void whileStatement() {
+    int loopStart = currentChunk()->count;
+    consume(TOKEN_LEFT_PAREN, "Expect '(' after while.");
+    expression();
+    consume(TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
+
+    int exitJump = emitJump(OP_JUMP_IF_FALSE);
+    emitByte(OP_POP);
+    statement();
+    emitLoop(loopStart);
+    patchJump(exitJump);
+    emitByte(OP_POP);
 }
 
 static void synchronize() {
@@ -423,6 +446,8 @@ static void statement() {
         printStatement();
     } else if (match(TOKEN_IF)) {
         ifStatement();
+    } else if (match(TOKEN_WHILE)){
+        whileStatement();
     } else if (match(TOKEN_LEFT_BRACE)) {
         beginScope();
         block();
