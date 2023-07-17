@@ -12,7 +12,7 @@ DEPENDS := $(patsubst %.c,%.d,$(SOURCES))
 all: run
 
 clean:
-	rm $(OBJECTS) $(DEPENDS) clox
+	rm -f $(OBJECTS) $(DEPENDS) clox
 
 clox: $(OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
@@ -23,4 +23,4 @@ clox: $(OBJECTS)
 	$(CC) $(CFLAGS) -MMD -MP -c -o $@ $<
 
 run: clox
-	./clox
+	./clox example.lox
