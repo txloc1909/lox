@@ -1,24 +1,2 @@
-fun outer() {
-    var x = "outside";
-    fun inner() {
-        print x;
-    }
-    return inner;
-}
-var closure = outer();
-closure();                      // should print "outside"
-
-
-fun makeClosure(value) {
-    fun closure() {
-        return value;
-    }
-
-    return closure;
-}
-
-var doughnut = makeClosure("doughnut");
-var bagel = makeClosure("bagel");
-
-print doughnut();               // should print "doughnut"
-print bagel();                  // should print "bagel"
+class Brioche {}
+print Brioche;
