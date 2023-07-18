@@ -4,6 +4,7 @@
 #include "compiler.h"
 #include "memory.h"
 #include "object.h"
+#include "table.h"
 #include "value.h"
 #include "vm.h"
 
@@ -56,6 +57,11 @@ void freeObject(Obj* object) {
             freeChunk(&function->chunk);
             FREE(OBJ_FUNCTION, function);
             break;
+        }
+        case OBJ_INSTANCE: {
+            ObjInstance* instance = (ObjInstance*)object;
+            markObject((Obj*)instance->klass);
+            markTable(&instance->fields);
         }
         case OBJ_NATIVE: {
             FREE(ObjNative, object);
@@ -141,6 +147,11 @@ static void blackenObject(Obj* object) {
             markObject((Obj*)function->name);
             markArray(&function->chunk.constants);
             break;
+        }
+        case OBJ_INSTANCE: {
+            ObjInstance* instance = (ObjInstance*)object;
+            freeTable(&instance->fields);
+            FREE(ObjInstance, object);
         }
         case OBJ_UPVALUE:
             markValue(((ObjUpvalue*)object)->closed);
