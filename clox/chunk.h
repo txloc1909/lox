@@ -20,6 +20,7 @@ typedef enum {
     OP_CLOSE_UPVALUE,
     OP_GET_PROPERTY,
     OP_SET_PROPERTY,
+    OP_GET_SUPER,
     OP_EQUAL,
     OP_GREATER,
     OP_LESS,
@@ -38,6 +39,7 @@ typedef enum {
     OP_CLOSURE,
     OP_RETURN,
     OP_CLASS,
+    OP_INHERIT,
     OP_METHOD,
 } OpCode;
 
