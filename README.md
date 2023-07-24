@@ -1,44 +1,37 @@
-# Tree-walk interpreter for the Lox programming language, written in Python3.11
+# Implementations of the Lox programming language
 
-## Requirements
+From the book [Crafting Interpreters](https://craftinginterpreters.com)
+by Robert Nystrom.
 
-### Runtime requirements
-Only `python>=3.11`
+- pylox: tree-walk interpreter
+- clox: bytecode virtual machine
 
-### Development requirements
-```
-pip install -r requirements-dev.txt
-```
+## Roadmap for language features
 
-## Roadmap
-- Set up tests for pylox
-- Implement challenges for pylox
-- Pythonic scanner
-    - Use generator pattern
-    - Or, a separate `Cursor` for traversing source code
-    - Record both token line AND column number
-- Re-consider another approach instead of visitor pattern
-- Implement `Environment` as a persistent data structure,
-  as a replacement for environment chaining
+### Do-able
+- [ ] Division-by-zero is runtime error
+- [ ] REPL print value evaluated by expression
+- [ ] The number 0.0 is considered falsey
+- [ ] C-style block comments, without nesting
+- [ ] Native function: `hasField` `getField` `setField` `deleteField`
 
-## Challenges from the book
-- [ ] Scanner: support C-style block comments `/* ... */`, but not allow nesting
-- [ ] Parser: support C comma operator
-- [ ] Parser: support ternary operator
-- [ ] Parser: add error productions to handle each binary operator appearing
-      without a left-hand operand. Report as an error, but also parse and discard
-      the right-hand operand with the appropriate precedence
-- [ ] Extend '+' operator: if either operand is a string, then the operator
-      become string concatenation
-- [ ] Detect and report division-by-zero as a runtime error
-- [ ] Allow the REPL to accept both statement and expression
-- [ ] Accessing uninitialized variable raise a runtime error
-- [ ] Control flow: support `break` (and probably `continue`) in loops
-- [ ] Functions: support anonymous functions / lambdas
-- [ ] Resolver: report an error if a local variable is never used
-- [ ] Resolver: extend to associate an unique index for each local variable
-      declared in a scope. When resolving, lookup both the scope and its index,
-      store. In the interpreter, use both info to quickly lookup, instead of using
-      a map
+### Considering
+- [ ] REPL with `readline` support
+- [ ] `break` and `continue` in `while` & `for` loop
+- [ ] Operator + do concat when either operand is string OR support string
+      interpolation
+- [ ] Anonymous function / `lambda`
+- [ ] Ternary operator
+- [ ] Extend comparison between strings
+- [ ] Traits for multi-inheritance
+- [ ] Switch-case statement: with or without `break` and fallthrough?
 - [ ] Class: support static methods using metaclass approach
 - [ ] Class: support getter methods
+
+### Useful features
+- [ ] General data structures: list/array, map/dictionary
+    - Alternatively, implement fixed-size array as the only native data
+      structure, then implement others on top of it
+- [ ] Read/write to file
+    - [ ] text file
+    - [ ] binary file
