@@ -298,7 +298,7 @@ class Parser:
                     break
 
         paren = self._consume(TokenType.RIGHT_PAREN, "Expect ')' after arguments.")
-        return CallExpr(callee, paren, arguments)
+        return CallExpr(callee, paren, tuple(arguments))
 
     def _primary(self) -> Expr:
         if self._match(TokenType.FALSE):

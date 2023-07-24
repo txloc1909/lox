@@ -54,7 +54,7 @@ class LogicalExpr(Expr):
 class CallExpr(Expr):
     callee: Expr
     paren: Token    # store the closing paren, for error handling
-    arguments: list[Expr]
+    arguments: tuple[Expr, ...]
 
 
 @dataclass(frozen=True, slots=True)
