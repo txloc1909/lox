@@ -199,8 +199,8 @@ class Parser:
                 return SetExpr(expr.obj, expr.name, value)
             else:
                 self._handler.parser_error(equals, "Invalid assignment target.")
-        else:
-            return expr
+
+        return expr
 
     def _or_expr(self) -> Expr:
         expr = self._and_expr()
