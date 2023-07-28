@@ -96,7 +96,7 @@ static Value peek(int distance) {
 
 static bool call(ObjClosure* closure, int argCount) {
     if (argCount != closure->function->arity) {
-        runtimeError("Expect %d arguments but got %d.",
+        runtimeError("Expected %d arguments but got %d.",
                      closure->function->arity, argCount);
         return false;
     }
@@ -132,7 +132,7 @@ static bool callValue(Value callee, int argCount) {
                 if (tableGet(&klass->methods, vm.initString, &initializer)) {
                     return call(AS_CLOSURE(initializer), argCount);
                 } else if (argCount != 0) {
-                    runtimeError("Expect 0 arguments but got %d.", argCount);
+                    runtimeError("Expected 0 arguments but got %d.", argCount);
                     return false;
                 }
 
@@ -264,7 +264,7 @@ static InterpretResult run() {
 #define BINARY_OP(valueType, op) \
     do { \
         if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) { \
-            runtimeError("Operand must be numbers."); \
+            runtimeError("Operands must be numbers."); \
             return INTERPRET_RUNTIME_ERROR; \
         } \
         double b = AS_NUMBER(pop()); \

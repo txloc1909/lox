@@ -102,7 +102,7 @@ class Scanner:
                 self._scan_identifier()
             else:
                 self._handler.error(at=self._line,
-                                    message=f"Unexpected character: {char}")
+                                    message=f"Unexpected character.")
 
     def _at_end(self) -> bool:
         return self._current >= len(self._src)

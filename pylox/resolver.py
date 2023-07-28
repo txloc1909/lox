@@ -52,12 +52,12 @@ class Resolver:
     def visit_ReturnStmt(self, stmt: ReturnStmt):
         if self._curr_func is FunctionType.NONE:
             self._handler.error(at=stmt.keyword,
-                                message="Cannot return from top-level code.")
+                                message="Can't return from top-level code.")
         if stmt.value:
             if self._curr_func is FunctionType.INITIALIZER:
                 self._handler.error(
                     at=stmt.keyword,
-                    message="Cannot return value from initializer."
+                    message="Can't return a value from an initializer."
                 )
             self._resolve(stmt.value)
 
@@ -85,7 +85,7 @@ class Resolver:
         self._define(stmt.name)
         if stmt.superclass and stmt.name.lexeme == stmt.superclass.name.lexeme:
             self._handler.error(at=stmt.superclass.name,
-                                message="A class cannot inherit from itself.")
+                                message="A class can't inherit from itself.")
         if stmt.superclass:
             self._curr_class = ClassType.SUBCLASS
             self._resolve(stmt.superclass)
@@ -145,10 +145,10 @@ class Resolver:
                 self._resolve_local(expr, expr.keyword)
             case ClassType.NONE:
                 self._handler.error(expr.keyword,
-                                    "Cannot use 'super' outside of a class.")
+                                    "Can't use 'super' outside of a class.")
             case ClassType.CLASS:
                 self._handler.error(expr.keyword,
-                                    "Cannot use 'super' in a class with no superclass")
+                                    "Can't use 'super' in a class with no superclass.")
 
     def visit_GroupingExpr(self, expr: GroupingExpr):
         self._resolve(expr.inner)
@@ -159,7 +159,7 @@ class Resolver:
     def visit_ThisExpr(self, expr: ThisExpr):
         if self._curr_class is ClassType.NONE:
             self._handler.error(at=expr.keyword,
-                                message="Cannot use 'this' outside of a class.")
+                                message="Can't use 'this' outside of a class.")
 
         self._resolve_local(expr, expr.keyword)
 
@@ -199,7 +199,7 @@ class Resolver:
         if name.lexeme in scope:
             self._handler.error(
                 at=name,
-                message="Already a variable with this name in this scope"
+                message="Already a variable with this name in this scope."
             )
 
         scope[name.lexeme] = False

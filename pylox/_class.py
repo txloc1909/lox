@@ -58,7 +58,7 @@ class LoxInstance:
         elif method := self._class.find_method(name.lexeme):
             return method.bind(self)
         else:
-            raise LoxRuntimeError(name, f"Undefine property {name.lexeme}.")
+            raise LoxRuntimeError(name, f"Undefined property '{name.lexeme}'.")
 
     def set(self, name: Token, value: Any):
         self._fields[name.lexeme] = value

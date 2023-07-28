@@ -145,7 +145,7 @@ static void emitByte(uint8_t byte) {
 static void emitLoop(int loopStart) {
     emitByte(OP_LOOP);
     int offset = currentChunk()->count - loopStart + 2;
-    if (offset > UINT16_MAX) error("Loop body too large!");
+    if (offset > UINT16_MAX) error("Loop body too large.");
 
     emitByte((offset >> 8) & 0xff);
     emitByte(offset & 0xff);
@@ -173,7 +173,7 @@ static void emitReturn() {
 static uint8_t makeConstant(Value value) {
     int constant = addConstant(currentChunk(), value);
     if (constant > UINT8_MAX) {
-        error("Too many constants in one chunk");
+        error("Too many constants in one chunk.");
         return 0;
     }
 
@@ -300,7 +300,7 @@ static int addUpvalue(Compiler* compiler, uint8_t index, bool isLocal) {
     }
 
     if (upvalueCount == UINT8_COUNT) {
-        error("Too many closure variables in function");
+        error("Too many closure variables in function.");
         return 0;
     }
 
@@ -349,7 +349,7 @@ static void declareVariable() {
         }
 
         if (identifiersEqual(name, &local->name)) {
-            error("Already a variable with this name in this scope");
+            error("Already a variable with this name in this scope.");
         }
     }
 

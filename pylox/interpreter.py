@@ -208,7 +208,7 @@ class Interpreter:
                 elif isinstance(left, str) and isinstance(right, str):
                     return left + right
                 else:
-                    raise LoxRuntimeError(expr.operator, "Operands must be two numbers or two strings")
+                    raise LoxRuntimeError(expr.operator, "Operands must be two numbers or two strings.")
             case TokenType.GREATER:
                 check_number_operands(expr.operator, left, right)
                 return left > right
@@ -264,7 +264,7 @@ class Interpreter:
         if isinstance(obj, LoxInstance):
             return obj.get(expr.name)
 
-        raise LoxRuntimeError(expr.name, "Only instances have properties")
+        raise LoxRuntimeError(expr.name, "Only instances have properties.")
 
     def visit_SetExpr(self, expr: SetExpr):
         obj = self.evaluate(expr.obj)
@@ -283,7 +283,7 @@ class Interpreter:
         obj = self._env.get_at(distance - 1, "this")    # the env where `this` is bound is always right inside the env where `super` are stored
         assert obj
         if not (method := superclass.find_method(expr.method.lexeme)):
-            raise LoxRuntimeError(expr.method, f"Undefined property {expr.method.lexeme}.")
+            raise LoxRuntimeError(expr.method, f"Undefined property '{expr.method.lexeme}'.")
         return method.bind(obj)
 
     def execute_block(self, statements: list[Stmt], env: Environment):

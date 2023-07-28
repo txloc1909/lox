@@ -19,7 +19,9 @@ class ErrorHandler:
         self.has_runtime_error = False
 
     def report(self, line: int, where: str, message: str):
-        print(f"[Line {line}] Error {where}: {message}", file=sys.stderr)
+        if len(where):
+            where = " " + where
+        print(f"[line {line}] Error{where}: {message}", file=sys.stderr)
         self.has_error = True
 
     def error(self, at: int | Token, message: str):
@@ -28,7 +30,7 @@ class ErrorHandler:
         elif isinstance(at, Token):
             token = at
             if token.type_ == TokenType.EOF:
-                self.report(token.line, " at end", message)
+                self.report(token.line, "at end", message)
             else:
                 self.report(token.line, f"at '{token.lexeme}'", message)
 
