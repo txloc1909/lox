@@ -4,6 +4,7 @@ import sys
 import re
 from pathlib import Path
 from collections import namedtuple
+from itertools import zip_longest
 import subprocess
 
 PYLOX_EXE = "./pylox/lox"
@@ -108,7 +109,7 @@ class Test:
                     continue
 
                 if match := EXPECTED_ERROR_PATTERN.search(line):
-                    self._expected_errors.add(f"[{i}]")
+                    self._expected_errors.add(f"[line {i}] {match[1]}")
                     self._expected_exit_code = 65
                     _expectations += 1
                     continue
@@ -116,7 +117,7 @@ class Test:
                 if match := ERROR_LINE_PATTERN.search(line):
                     language = match[2]
                     if not language or language == _suite.language:
-                        self._expected_errors.add(f"[{match[3]}] {match[4]}")
+                        self._expected_errors.add(f"[line {match[3]}] {match[4]}")
                         self._expected_exit_code = 65
                         _expectations += 1
                     continue
@@ -129,7 +130,7 @@ class Test:
 
         if self._expected_errors and self._expected_runtime_error:
             print(f"{term.pink('TEST ERROR')} {self.path}")
-            print(f"\tCannot expect both compile and runtime error.")
+            print(f"    Cannot expect both compile and runtime error.")
             print(f"")
             return False
 
@@ -155,13 +156,72 @@ class Test:
         return self._failures
 
     def _validate_runtime_error(self, error_lines):
-        pass
+        while len(error_lines) and error_lines[-1]:
+            error_lines.pop()
+
+        if len(error_lines) < 2:
+            self._fail(f"Expected runtime error {self._expected_runtime_error} and got none.")
+
+        if error_lines[0] != self._expected_runtime_error:
+            self._fail(f"Expected runtime error {self._expected_runtime_error} and got:")
+            self._fail(error_lines[0])
+
+        stack_lines = error_lines[1:]
+        matches = (STACK_TRACE_PATTERN.search(l) for l in stack_lines)
+        match = next((m for m in matches if m), None)
+        if not match:
+            self._fail("Expected stack trace and got: ", stack_lines)
+        else:
+            stack_line = int(match[1])
+            if stack_line != self._runtime_error_line:
+                self._fail(f"Expected runtime error on line " \
+                           f"{self._runtime_error_line} but was on line " \
+                           f"{stack_line}.")
 
     def _validate_compile_error(self, error_lines):
-        pass
+        if len(error_lines) and not error_lines[-1]:
+            error_lines.pop()
+
+        errors_found = set()
+        unexpected_count = 0
+        for line in error_lines:
+            if match := SYNTAX_ERROR_PATTERN.search(line):
+                error = f"[line {match[1]}] {match[2]}"
+                if error in self._expected_errors:
+                    errors_found.add(error)
+                else:
+                    if unexpected_count < 10:
+                        self._fail("Unexpected error:")
+                        self._fail(line)
+                    unexpected_count += 1
+            elif len(line):
+                if unexpected_count < 10:
+                    self._fail("Unexpected error:")
+                    self._fail(line)
+                unexpected_count += 1
+
+        if unexpected_count > 10:
+            self._fail(f"(truncated {unexpected_count - 1} more...)")
+
+        for error in self._expected_errors.difference(errors_found):
+            self._fail(f"Missing expected error: {error}")
+
 
     def _validate_output(self, output_lines):
-        pass
+        if len(output_lines) and output_lines[-1] == "":
+            output_lines.pop()
+
+        for output, expected in zip_longest(output_lines, self._expected_output,
+                                            fillvalue=None):
+            if expected is None:
+                self._fail(f"Got output {output} when none was expected.")
+            elif output is None:
+                self._fail(f"Expected output {expected.output} on line " \
+                           f"{expected.line}.")
+            elif expected.output != output:
+                self._fail(f"Expected output {expected.output} on line " \
+                           f"{expected.line} and got {output}")
+
 
     def _validate_exit_code(self, exit_code, error_lines):
         if exit_code == self._expected_exit_code:
@@ -187,7 +247,7 @@ def run_test(path: Path | str):
 
     # Update status line
     term.update_line(f"Passed: {term.green(_n_passed)} " \
-                     f"Failed: {term.green(_n_failed)} " \
+                     f"Failed: {term.red(_n_failed)} " \
                      f"Skipped: {term.yellow(_n_skipped)} " \
                      f"{term.gray(path)}")
 
@@ -203,11 +263,11 @@ def run_test(path: Path | str):
         term.clear_line()
         print(f"{term.red('FAIL')} {path}")
         for failure in failures:
-            print(f"\t{term.pink(failure)}")
+            print(f"    {term.pink(failure)}")
         print("")
 
 
-def run_suite(name: str):
+def run_suite(name: str) -> bool:
     global _suite, _all_suites, _n_passed, _n_failed, _n_skipped, _expectations
     _suite = _all_suites[name]
     _n_passed = 0
@@ -260,6 +320,7 @@ def _define_test_suites():
     }
     nan_equality = { "tests/number/nan_equality.lox": "skip" }
     no_limits = { "tests/limit": "skip" }
+
 
     py_suite("pylox", all | early_chapters | nan_equality | no_limits)
     c_suite("clox", all | early_chapters)
