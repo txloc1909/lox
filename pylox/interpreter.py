@@ -28,6 +28,22 @@ def check_number_operands(operator: Token, left, right):
         raise LoxRuntimeError(operator, "Operands must be numbers.")
 
 
+def is_truthy(obj) -> bool:
+    if obj is None:
+        return False
+    if isinstance(obj, bool):
+        return obj
+    return True
+
+
+def is_equal(a, b) -> bool:
+    if a is None and b is None:
+        return True
+    if a is None:
+        return False
+
+    return a == b if type(a) is type(b) else False
+
 def stringify(value):
     if value is None:
         return "nil"
@@ -107,7 +123,7 @@ class Interpreter:
         self.execute_block(stmt.statements, Environment(enclosing=self._env))
 
     def visit_IfStmt(self, stmt: IfStmt):
-        if bool(self.evaluate(stmt.condition)):
+        if is_truthy(self.evaluate(stmt.condition)):
             self.execute(stmt.then_branch)
         elif stmt.else_branch:
             self.execute(stmt.else_branch)
@@ -184,7 +200,7 @@ class Interpreter:
                 check_number_operand(expr.operator, right)
                 return -float(right)
             case TokenType.BANG:
-                return not bool(right)
+                return not is_truthy(right)
             case _:
                 return None
 
@@ -222,9 +238,9 @@ class Interpreter:
                 check_number_operands(expr.operator, left, right)
                 return left <= right
             case TokenType.BANG_EQUAL:
-                return left != right
+                return not is_equal(left, right)
             case TokenType.EQUAL_EQUAL:
-                return left == right
+                return is_equal(left, right)
             case _:
                 return None
 
@@ -235,10 +251,10 @@ class Interpreter:
         # return the object, with its appropriate truthiness,
         # not the literal True or false, and let the caller decide how to use
         if expr.operator.type_ == TokenType.OR:
-            if left:
+            if is_truthy(left):
                 return left
         else:
-            if not left:
+            if not is_truthy(left):
                 return left
 
         return self.evaluate(expr.right)
