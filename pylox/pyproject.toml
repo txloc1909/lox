@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "pylox"
+version = "0.1.0"
+description = "Tree-walk interpreter for the Lox programming language"
+authors = ["Tran Xuan Loc <tranxuanloc19920@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.4.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
