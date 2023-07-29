@@ -1,3 +1,6 @@
+from typing import Iterator
+from contextlib import contextmanager, nullcontext, ExitStack
+
 from _token import Token
 from expr import (Expr, VarExpr, AssignExpr, BinaryExpr, CallExpr, GroupingExpr,
                   LiteralExpr, LogicalExpr, UnaryExpr, GetExpr, SetExpr,
@@ -33,10 +36,8 @@ class Resolver:
             self._resolve(s)
 
     def visit_BlockStmt(self, stmt: BlockStmt):
-        # NOTE: use context manager
-        self._begin_scope()
-        self.resolve(stmt.statements)
-        self._end_scope()
+        with self._new_scope():
+            self.resolve(stmt.statements)
 
     def visit_VarStmt(self, stmt: VarStmt):
         self._declare(stmt.name)
@@ -78,34 +79,27 @@ class Resolver:
         self._resolve(stmt.body)
 
     def visit_ClassStmt(self, stmt: ClassStmt):
-        enclosing_class = self._curr_class
-        self._curr_class = ClassType.CLASS
+        with ExitStack() as stack:
+            stack.enter_context(self._new_class(ClassType.CLASS))
+            self._declare(stmt.name)
+            self._define(stmt.name)
 
-        self._declare(stmt.name)
-        self._define(stmt.name)
-        if stmt.superclass and stmt.name.lexeme == stmt.superclass.name.lexeme:
-            self._handler.error(at=stmt.superclass.name,
-                                message="A class can't inherit from itself.")
-        if stmt.superclass:
-            self._curr_class = ClassType.SUBCLASS
-            self._resolve(stmt.superclass)
+            if stmt.superclass and stmt.name.lexeme == stmt.superclass.name.lexeme:
+                self._handler.error(at=stmt.superclass.name,
+                                    message="A class can't inherit from itself.")
+            if stmt.superclass:
+                stack.enter_context(self._new_class(ClassType.SUBCLASS))
+                self._resolve(stmt.superclass)
+                superclass_scope = stack.enter_context(self._new_scope())
+                superclass_scope["super"] = True
 
-        if stmt.superclass:
-            self._begin_scope()
-            self._scopes[-1]["super"] = True
-        self._begin_scope()
-        self._scopes[-1]["this"] = True
-        for method in stmt.methods:
-            if method.name.lexeme == "init":
-                declaration = FunctionType.INITIALIZER
-            else:
-                declaration = FunctionType.METHOD
-            self._resolve_function(method, declaration)
-        self._end_scope()
-        if stmt.superclass:
-            self._end_scope()
-
-        self._curr_class = enclosing_class
+            class_scope = stack.enter_context(self._new_scope())
+            class_scope["this"] = True
+            for method in stmt.methods:
+                method_name = method.name.lexeme
+                declaration = FunctionType.INITIALIZER if method_name == "init" \
+                        else FunctionType.METHOD
+                self._resolve_function(method, declaration)
 
     def visit_VarExpr(self, expr: VarExpr):
         if self._scopes and (expr.name.lexeme in self._scopes[-1]) \
@@ -177,19 +171,11 @@ class Resolver:
                 return
 
     def _resolve_function(self, function: FunctionStmt, func_type: FunctionType):
-        # NOTE: use context manager
-        enclosing_func = self._curr_func
-        self._curr_func = func_type
-
-        self._begin_scope()
-        for param in function.params:
-            self._declare(param)
-            self._define(param)
-        self.resolve(function.body)
-        self._end_scope()
-
-        self._curr_func = enclosing_func
-
+        with self._new_function(func_type):
+            for param in function.params:
+                self._declare(param)
+                self._define(param)
+            self.resolve(function.body)
 
     def _declare(self, name: Token):
         if not self._scopes:
@@ -209,8 +195,24 @@ class Resolver:
             return
         self._scopes[-1][name.lexeme] = True
 
-    def _begin_scope(self):
-        self._scopes.append(dict())
-
-    def _end_scope(self):
+    @contextmanager
+    def _new_scope(self) -> Iterator[dict[str, bool]]:
+        new_scope: dict[str, bool] = {}
+        self._scopes.append(new_scope)
+        yield new_scope
         self._scopes.pop()
+
+    @contextmanager
+    def _new_function(self, func_type: FunctionType):
+        enclosing_func = self._curr_func
+        self._curr_func = func_type
+        with self._new_scope():     # function gets its own scope
+            yield
+        self._curr_func = enclosing_func
+
+    @contextmanager
+    def _new_class(self, class_type: ClassType):
+        enclosing_class = self._curr_class
+        self._curr_class = class_type
+        yield
+        self._curr_class = enclosing_class
