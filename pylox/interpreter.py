@@ -6,7 +6,6 @@ from expr import (Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr,
                   ThisExpr, SuperExpr)
 from stmt import (Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt, IfStmt,
                   WhileStmt, FunctionStmt, ReturnStmt, ClassStmt)
-from visitor import Visitor
 from callable import LoxCallable
 from function import LoxFunction, Return
 from _class import LoxClass, LoxInstance
@@ -84,10 +83,10 @@ class Interpreter:
         return self._GLOBAL_ENV
 
     def evaluate(self, expr: Expr):
-        return expr.accept(self)
+        return getattr(self, f"visit_{type(expr).__name__}")(expr)
 
     def execute(self, stmt: Stmt):
-        return stmt.accept(self)
+        return getattr(self, f"visit_{type(stmt).__name__}")(stmt)
 
     def resolve(self, expr: Expr, depth: int):
         if expr in self._locals:
@@ -100,9 +99,6 @@ class Interpreter:
                 self.execute(s)
         except LoxRuntimeError as e:
             self._handler.runtime_error(e)
-
-    def visit(self, visitee: Expr | Stmt):
-        return getattr(self, f"visit_{type(visitee).__name__}")(visitee)
 
     def visit_ExpressionStmt(self, stmt: ExpressionStmt):
         self.evaluate(stmt.expr)
@@ -318,7 +314,3 @@ class Interpreter:
             return self._env.get_at(distance, name.lexeme)
         else:
             return self.global_env.get(name)
-
-
-if __name__ == "__main__":
-    assert issubclass(Interpreter, Visitor)

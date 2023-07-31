@@ -3,12 +3,10 @@ from typing import Optional
 
 from _token import Token
 from expr import Expr, VarExpr
-from visitor import Visitor
 
 
 class Stmt:
-    def accept(self, visitor: Visitor):
-        return visitor.visit(self)
+    pass
 
 
 @dataclass(frozen=True, slots=True)

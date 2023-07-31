@@ -1,12 +1,9 @@
 from dataclasses import dataclass
 
 from scanner import Token
-from visitor import Visitor
-
 
 class Expr:
-    def accept(self, visitor: Visitor):
-        return visitor.visit(self)
+    pass
 
 
 @dataclass(frozen=True, slots=True)

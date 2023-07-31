@@ -1,13 +1,10 @@
 from scanner import TokenType, Token
-from expr import Visitor, Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr
+from expr import Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr
 
 
 class ASTPrinter:
 
     def print(self, expr: Expr):
-        return expr.accept(self)
-
-    def visit(self, expr: Expr) -> str:
         return getattr(self, f"visit_{type(expr).__name__}")(expr)
 
     def visit_BinaryExpr(self, expr: BinaryExpr) -> str:
@@ -23,12 +20,10 @@ class ASTPrinter:
         return self._parenthesize(expr.operator.lexeme, expr.right)
 
     def _parenthesize(self, name: str, *exprs: Expr) -> str:
-        return f"({name} " + " ".join(e.accept(self) for e in exprs) + ")"
+        return f"({name} " + " ".join(self.print(e) for e in exprs) + ")"
 
 
 if __name__ == "__main__":
-    assert issubclass(ASTPrinter, Visitor)
-
     test_expression = BinaryExpr(
         left=UnaryExpr(
             Token(TokenType.MINUS, "-", None, 1),

@@ -7,7 +7,6 @@ from expr import (Expr, VarExpr, AssignExpr, BinaryExpr, CallExpr, GroupingExpr,
                   ThisExpr, SuperExpr)
 from stmt import (Stmt, BlockStmt, VarStmt, FunctionStmt, ExpressionStmt, IfStmt,
                   PrintStmt, WhileStmt, ReturnStmt, ClassStmt)
-from visitor import Visitor
 from function import FunctionType
 from _class import ClassType
 from error_handling import LoxRuntimeError, ErrorHandler
@@ -22,14 +21,8 @@ class Resolver:
         self._curr_func = FunctionType.NONE
         self._curr_class = ClassType.NONE
 
-    def visit(self, visitee: Expr | Stmt):
-        try:
-            return getattr(self, f"visit_{type(visitee).__name__}")(visitee)
-        except AttributeError:
-            pass
-
     def _resolve(self, ast_node: Expr | Stmt):
-        ast_node.accept(self)
+        return getattr(self, f"visit_{type(ast_node).__name__}")(ast_node)
 
     def resolve(self, statements: list[Stmt]):
         for s in statements:
