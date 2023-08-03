@@ -1,4 +1,5 @@
 import time
+from contextlib import contextmanager
 
 from _token import Token, TokenType
 from expr import (Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr,
@@ -299,12 +300,16 @@ class Interpreter:
         return method.bind(obj)
 
     def execute_block(self, statements: list[Stmt], env: Environment):
-        # NOTE: use context manager, probably?
-        prev_env = self._env
-        try:
-            self._env = env
+        with self._new_env(env):
             for stmt in statements:
                 self.execute(stmt)
+
+    @contextmanager
+    def _new_env(self, env: Environment):
+        prev_env = self._env
+        self._env = env
+        try:
+            yield
         finally:
             self._env = prev_env
 

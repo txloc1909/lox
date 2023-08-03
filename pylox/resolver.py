@@ -192,20 +192,26 @@ class Resolver:
     def _new_scope(self) -> Iterator[dict[str, bool]]:
         new_scope: dict[str, bool] = {}
         self._scopes.append(new_scope)
-        yield new_scope
-        self._scopes.pop()
+        try:
+            yield new_scope
+        finally:
+            self._scopes.pop()
 
     @contextmanager
     def _new_function(self, func_type: FunctionType):
         enclosing_func = self._curr_func
         self._curr_func = func_type
-        with self._new_scope():     # function gets its own scope
-            yield
-        self._curr_func = enclosing_func
+        try:
+            with self._new_scope():     # function gets its own scope
+                yield
+        finally:
+            self._curr_func = enclosing_func
 
     @contextmanager
     def _new_class(self, class_type: ClassType):
         enclosing_class = self._curr_class
         self._curr_class = class_type
-        yield
-        self._curr_class = enclosing_class
+        try:
+            yield
+        finally:
+            self._curr_class = enclosing_class
