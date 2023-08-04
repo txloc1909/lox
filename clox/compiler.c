@@ -469,10 +469,10 @@ static void parsePrecedence(Precedence precedence) {
         advance();
         ParseFn infixRule = getRule(parser.previous.type)->infix;
         infixRule(canAssign);
+    }
 
-        if (canAssign && match(TOKEN_EQUAL)) {
-            error("Invalid assignment target.");
-        }
+    if (canAssign && match(TOKEN_EQUAL)) {
+        error("Invalid assignment target.");
     }
 }
 
@@ -871,6 +871,7 @@ ParseRule rules[] = {
     [TOKEN_LEFT_PAREN]      = {grouping,        call,       PREC_CALL        },
     [TOKEN_RIGHT_PAREN]     = {NULL,            NULL,       PREC_NONE        },
     [TOKEN_LEFT_BRACE]      = {NULL,            NULL,       PREC_NONE        },
+    [TOKEN_RIGHT_BRACE]     = {NULL,            NULL,       PREC_NONE        },
     [TOKEN_COMMA]           = {NULL,            NULL,       PREC_NONE        },
     [TOKEN_DOT]             = {NULL,            dot,        PREC_CALL        },
     [TOKEN_MINUS]           = {unary,           binary,     PREC_TERM        },
