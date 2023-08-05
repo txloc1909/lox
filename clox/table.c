@@ -7,6 +7,13 @@
 #include "table.h"
 
 #define TABLE_MAX_LOAD 0.75
+#define IS_TOMBSTONE(entry) ((entry)->key == TOMBSTONE.key && \
+                             (entry)->value == TOMBSTONE.value)
+
+static const Entry TOMBSTONE = {
+    .key = NULL,
+    .value = BOOL_VAL(true),
+};
 
 void initTable(Table* table) {
     table->count = 0;
@@ -21,15 +28,10 @@ void freeTable(Table* table) {
 
 static Entry* findEntry(Entry* entries, int capacity, ObjString* key) {
     uint32_t index = key->hash & (capacity - 1);
-    Entry* tombstone = NULL;
     for (;;) {
         Entry* entry = &entries[index];
-        if (entry->key == NULL) {
-            if (IS_NIL(entry->value)) {
-                return tombstone != NULL ? tombstone : entry;
-            } else {
-                if (tombstone == NULL) tombstone = entry;
-            }
+        if (entry->key == NULL && !IS_TOMBSTONE(entry)) {
+            return entry;
         } else if (entry->key == key) {
             // found!
             return entry;
@@ -80,7 +82,7 @@ bool tableSet(Table* table, ObjString* key, Value value) {
 
     Entry* entry = findEntry(table->entries, table->capacity, key);
     bool isNewKey = entry->key == NULL;
-    if (isNewKey && IS_NIL(entry->value)) {     /* don't count tombstone */
+    if (isNewKey && !IS_TOMBSTONE(entry)) {
         table->count++;
     }
 
@@ -95,9 +97,7 @@ bool tableDelete(Table* table, ObjString* key) {
     Entry* entry = findEntry(table->entries, table->capacity, key);
     if (entry->key == NULL) return false;
 
-    /* Place a tombstone */
-    entry->key = NULL;
-    entry->value = BOOL_VAL(true);
+    *entry = TOMBSTONE;
     return true;
 }
 
@@ -118,7 +118,7 @@ ObjString* tableFindString(Table* table, const char* chars, int length,
     for (;;) {
         Entry* entry = &table->entries[index];
         if (entry->key == NULL) {
-            if (IS_NIL(entry->value))
+            if (!IS_TOMBSTONE(entry))
                 // true empty slot -> return
                 return NULL;
         } else if (entry->key->length == length &&

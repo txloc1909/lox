@@ -2,7 +2,7 @@
 
 ## clox-specific roadmap
 - [ ] VM: Encourage C compiler to put `ip` in a register
-- [ ] Hash table: refactor the use of tombstone slot -> make code more readable
+- [x] Hash table: refactor the use of tombstone slot -> make code more readable
 - [ ] Native func: add arity checking for native func
 - [ ] Native func: signal runtime error from native func
 - [ ] Chunk: change encoding of line infomation to run-length encoding
