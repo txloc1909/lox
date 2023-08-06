@@ -8,7 +8,7 @@ from itertools import zip_longest
 import subprocess
 
 PYLOX_EXE = "./pylox/lox"
-CLOX_EXE = "./clox/clox"
+CLOX_EXE = "./clox/build/clox"
 
 EXPECTED_OUTPUT_PATTERN = re.compile(r"// expect: ?(.*)")
 EXPECTED_ERROR_PATTERN = re.compile(r"// (Error.*)")
@@ -26,9 +26,6 @@ _expectations = 0
 Suite = namedtuple("Suite", ["name", "language", "executable", "tests"])
 
 _suite = None                   # Current suite
-_custom_interpreter = None
-_custom_args = []
-
 _all_suites = {}
 _c_suites = []
 _py_suites = []
