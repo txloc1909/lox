@@ -19,7 +19,7 @@ clox: $(OBJECTS)
 
 -include $(DEPENDS)
 
-%.o: %.c Makefile
+$(OBJECTS): %.o: %.c
 	$(CC) $(CFLAGS) -MMD -MP -c -o $@ $<
 
 run: clox
