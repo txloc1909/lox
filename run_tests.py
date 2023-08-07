@@ -153,7 +153,7 @@ class Test:
         return self._failures
 
     def _validate_runtime_error(self, error_lines):
-        while len(error_lines) and error_lines[-1]:
+        while len(error_lines) and not error_lines[-1]:
             error_lines.pop()
 
         if len(error_lines) < 2:
@@ -272,6 +272,9 @@ def run_suite(name: str) -> bool:
     _n_skipped = 0
     _expectations = 0
 
+    if not Path(_suite.executable).exists():
+        raise ValueError(f"Executable {_suite.executable} does not exist!")
+
     for file_ in Path("./tests").rglob("*.lox"):
         run_test(file_)
 
@@ -326,9 +329,6 @@ def _define_test_suites():
 def main(args):
     global _suite
     _define_test_suites()
-
-    assert Path(PYLOX_EXE).exists(), "pylox executable does not exits!"
-    assert Path(CLOX_EXE).exists(), "clox executable does not exits!"
 
     if len(args) > 2:
         sys.exit(f"Usage: {sys.argv[0]} suite")
