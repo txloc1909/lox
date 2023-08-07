@@ -326,6 +326,10 @@ def _define_test_suites():
 def main(args):
     global _suite
     _define_test_suites()
+
+    assert Path(PYLOX_EXE).exists(), "pylox executable does not exits!"
+    assert Path(CLOX_EXE).exists(), "clox executable does not exits!"
+
     if len(args) > 2:
         sys.exit(f"Usage: {sys.argv[0]} suite")
     elif len(args) == 2:
