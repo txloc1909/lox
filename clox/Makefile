@@ -1,6 +1,13 @@
 CC=gcc
-CFLAGS=-Wall -Wextra -Og -g -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
-LDFLAGS= -Og -g -fsanitize=address -fsanitize=undefined
+
+# Flags for debug build
+# CFLAGS=-Wall -Wextra -Wno-unused-parameter -Og -g -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
+# LDFLAGS= -Og -g -fsanitize=address -fsanitize=undefined
+
+# Flags for release build
+CFLAGS=-Wall -Wextra -Wno-unused-parameter -O3 -flto -march=native
+LDFLAGS=-O3 -flto -march=native
+
 LDLIBS=-lm
 
 SRC_DIR=src/
