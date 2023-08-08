@@ -1,17 +1,17 @@
 import time
 from contextlib import contextmanager
 
-from _token import Token, TokenType
-from expr import (Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr,
+from pylox._token import Token, TokenType
+from pylox.expr import (Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr,
                   VarExpr, AssignExpr, LogicalExpr, CallExpr, GetExpr, SetExpr,
                   ThisExpr, SuperExpr)
-from stmt import (Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt, IfStmt,
+from pylox.stmt import (Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt, IfStmt,
                   WhileStmt, FunctionStmt, ReturnStmt, ClassStmt)
-from callable import LoxCallable
-from function import LoxFunction, Return
-from _class import LoxClass, LoxInstance
-from environment import Environment
-from error_handling import LoxRuntimeError, ErrorHandler
+from pylox.callable import LoxCallable
+from pylox.function import LoxFunction, Return
+from pylox._class import LoxClass, LoxInstance
+from pylox.environment import Environment
+from pylox.error_handling import LoxRuntimeError, ErrorHandler
 
 
 def check_number_operand(operator: Token, operand):

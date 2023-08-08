@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from scanner import Token
+from pylox._token import Token
 
 class Expr:
     pass

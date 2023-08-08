@@ -1,8 +1,10 @@
-from scanner import Scanner
-from parser import Parser
-from resolver import Resolver
-from interpreter import Interpreter
-from error_handling import ErrorHandler
+import sys
+
+from pylox.scanner import Scanner
+from pylox.parser import Parser
+from pylox.resolver import Resolver
+from pylox.interpreter import Interpreter
+from pylox.error_handling import ErrorHandler
 
 
 class PyLox:

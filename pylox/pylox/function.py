@@ -1,8 +1,8 @@
 from enum import Enum
 
-from stmt import FunctionStmt
-from environment import Environment
-from callable import LoxCallable
+from pylox.stmt import FunctionStmt
+from pylox.environment import Environment
+from pylox.callable import LoxCallable
 
 
 class FunctionType(Enum):

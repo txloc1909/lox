@@ -1,9 +1,9 @@
-# Tree-walk interpreter for the Lox programming language, written in Python3.11
+# Tree-walk interpreter for the Lox programming language, written in Python
 
 ## Requirements
 
 ### Runtime requirements
-Only `python>=3.11`
+Only `python>=3.10`
 
 ### Development requirements
 ```

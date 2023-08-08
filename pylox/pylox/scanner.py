@@ -1,7 +1,7 @@
 from collections.abc import Mapping
 
-from _token import TokenType, Token
-from error_handling import ErrorHandler
+from pylox._token import TokenType, Token
+from pylox.error_handling import ErrorHandler
 
 _KEYWORDS: Mapping[str, TokenType] = {
         "and" :         TokenType.AND,

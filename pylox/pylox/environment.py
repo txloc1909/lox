@@ -1,7 +1,7 @@
 from typing import Optional, Any
 
-from _token import Token
-from error_handling import LoxRuntimeError
+from pylox._token import Token
+from pylox.error_handling import LoxRuntimeError
 
 
 class Environment:

@@ -1,6 +1,6 @@
 import sys
 
-from _token import Token, TokenType
+from pylox._token import Token, TokenType
 
 
 class ParserError(RuntimeError):

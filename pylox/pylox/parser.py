@@ -1,12 +1,12 @@
 from typing import Optional
 
-from _token import TokenType, Token
-from expr import (Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr,
+from pylox._token import TokenType, Token
+from pylox.expr import (Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr,
                   VarExpr, AssignExpr, LogicalExpr, CallExpr, GetExpr, SetExpr,
                   ThisExpr, SuperExpr)
-from stmt import (Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt, IfStmt,
+from pylox.stmt import (Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt, IfStmt,
                   WhileStmt, FunctionStmt, ReturnStmt, ClassStmt)
-from error_handling import ErrorHandler, ParserError
+from pylox.error_handling import ErrorHandler, ParserError
 
 
 class Parser:

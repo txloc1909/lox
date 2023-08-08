@@ -2,10 +2,10 @@ from typing import Any, Optional
 from enum import Enum
 from dataclasses import dataclass, field
 
-from _token import Token
-from callable import LoxCallable
-from function import LoxFunction
-from error_handling import LoxRuntimeError
+from pylox._token import Token
+from pylox.callable import LoxCallable
+from pylox.function import LoxFunction
+from pylox.error_handling import LoxRuntimeError
 
 
 class ClassType(Enum):

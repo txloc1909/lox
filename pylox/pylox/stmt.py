@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from _token import Token
-from expr import Expr, VarExpr
+from pylox._token import Token
+from pylox.expr import Expr, VarExpr
 
 
 class Stmt:
