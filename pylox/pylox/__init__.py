@@ -1,1 +1,1 @@
-from .lox import PyLox
+from pylox.lox import PyLox

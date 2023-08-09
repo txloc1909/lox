@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-
 import os
 os.environ["PYTHONPATH"] = "pylox"
-
-from pylox.cli import main
+from pylox.__main__ import main
 main()
