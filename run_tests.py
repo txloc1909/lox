@@ -153,9 +153,6 @@ class Test:
         return self._failures
 
     def _validate_runtime_error(self, error_lines):
-        while len(error_lines) and not error_lines[-1]:
-            error_lines.pop()
-
         if len(error_lines) < 2:
             self._fail(f"Expected runtime error {self._expected_runtime_error} and got none.")
 
