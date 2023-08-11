@@ -42,67 +42,67 @@ class Scanner:
 
     def _scan_one_token(self):
         char = self._advance()
-
+        match char:
         ### Single-character tokens
-        if char == "(":
-            self._add_token(TokenType.LEFT_PAREN)
-        elif char == ")":
-            self._add_token(TokenType.RIGHT_PAREN)
-        elif char == "{":
-            self._add_token(TokenType.LEFT_BRACE)
-        elif char == "}":
-            self._add_token(TokenType.RIGHT_BRACE)
-        elif char == ",":
-            self._add_token(TokenType.COMMA)
-        elif char == ".":
-            self._add_token(TokenType.DOT)
-        elif char == "-":
-            self._add_token(TokenType.MINUS)
-        elif char == "+":
-            self._add_token(TokenType.PLUS)
-        elif char == ";":
-            self._add_token(TokenType.SEMICOLON)
-        elif char == "*":
-            self._add_token(TokenType.STAR)
-        ### Two-character
-        elif char == "!":
-            self._add_token(
-                TokenType.BANG_EQUAL if self._match("=") else TokenType.BANG
-            )
-        elif char == "=":
-            self._add_token(
-                TokenType.EQUAL_EQUAL if self._match("=") else TokenType.EQUAL
-            )
-        elif char == "<":
-            self._add_token(
-                TokenType.LESS_EQUAL if self._match("=") else TokenType.LESS
-            )
-        elif char == ">":
-            self._add_token(
-                TokenType.GREATER_EQUAL if self._match("=") else TokenType.GREATER
-            )
-        elif char == "/":
-            # Ignore comments
-            if self._match("/"):
-                while self._peek() != "\n" and not self._at_end():
-                    self._advance()
-            else:
-                self._add_token(TokenType.SLASH)
-        elif char in (" ", "\r", "\t"):
-            # do nothing with whitespaces
-            pass
-        elif char == "\n":
-            self._line += 1
-        elif char == '"':
-            self._scan_string_literal()
-        else:
-            if char.isdigit():
-                self._scan_number_literal()
-            elif char.isalpha():
-                self._scan_identifier()
-            else:
-                self._handler.error(at=self._line,
-                                    message=f"Unexpected character.")
+            case "(":
+                self._add_token(TokenType.LEFT_PAREN)
+            case ")":
+                self._add_token(TokenType.RIGHT_PAREN)
+            case "{":
+                self._add_token(TokenType.LEFT_BRACE)
+            case "}":
+                self._add_token(TokenType.RIGHT_BRACE)
+            case ",":
+                self._add_token(TokenType.COMMA)
+            case ".":
+                self._add_token(TokenType.DOT)
+            case "-":
+                self._add_token(TokenType.MINUS)
+            case "+":
+                self._add_token(TokenType.PLUS)
+            case ";":
+                self._add_token(TokenType.SEMICOLON)
+            case "*":
+                self._add_token(TokenType.STAR)
+            ### Two-character
+            case "!":
+                self._add_token(
+                    TokenType.BANG_EQUAL if self._match("=") else TokenType.BANG
+                )
+            case "=":
+                self._add_token(
+                    TokenType.EQUAL_EQUAL if self._match("=") else TokenType.EQUAL
+                )
+            case "<":
+                self._add_token(
+                    TokenType.LESS_EQUAL if self._match("=") else TokenType.LESS
+                )
+            case ">":
+                self._add_token(
+                    TokenType.GREATER_EQUAL if self._match("=") else TokenType.GREATER
+                )
+            case "/":
+                # Ignore comments
+                if self._match("/"):
+                    while self._peek() != "\n" and not self._at_end():
+                        self._advance()
+                else:
+                    self._add_token(TokenType.SLASH)
+            case " " | "\r" | "\t":
+                # do nothing with whitespaces
+                pass
+            case "\n":
+                self._line += 1
+            case '"':
+                self._scan_string_literal()
+            case _:
+                if char.isdigit():
+                    self._scan_number_literal()
+                elif char.isalpha():
+                    self._scan_identifier()
+                else:
+                    self._handler.error(at=self._line,
+                                        message=f"Unexpected character.")
 
     def _at_end(self) -> bool:
         return self._current >= len(self._src)
