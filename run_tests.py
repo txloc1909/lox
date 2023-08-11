@@ -315,11 +315,9 @@ def _define_test_suites():
         "tests/scanning": "skip",
         "tests/expressions": "skip",
     }
-    nan_equality = { "tests/number/nan_equality.lox": "skip" }
     no_limits = { "tests/limit": "skip" }
 
-
-    py_suite("pylox", all | early_chapters | nan_equality | no_limits)
+    py_suite("pylox", all | early_chapters | no_limits)
     c_suite("clox", all | early_chapters)
 
 

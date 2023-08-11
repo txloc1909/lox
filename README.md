@@ -9,9 +9,7 @@ by Robert Nystrom.
 ## Roadmap for language features
 
 ### Do-able
-- [ ] Division-by-zero is runtime error
 - [ ] REPL print value evaluated by expression
-- [ ] The number 0.0 is considered falsey
 - [ ] C-style block comments, without nesting
 - [ ] Native function: `hasField` `getField` `setField` `deleteField`
 

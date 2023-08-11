@@ -211,7 +211,15 @@ class Interpreter:
                 return left - right
             case TokenType.SLASH:
                 check_number_operands(expr.operator, left, right)
-                return left / right
+                try:
+                    return left / right
+                except ZeroDivisionError:
+                    if left > 0:
+                        return float("inf")
+                    elif left < 0:
+                        return float("-inf")
+                    else:
+                        return float("-nan")
             case TokenType.STAR:
                 check_number_operands(expr.operator, left, right)
                 return left * right
