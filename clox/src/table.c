@@ -8,7 +8,7 @@
 
 #define TABLE_MAX_LOAD 0.75
 #define IS_TOMBSTONE(entry) ((entry)->key == TOMBSTONE.key && \
-                             (entry)->value == TOMBSTONE.value)
+                             valuesEqual((entry)->value, TOMBSTONE.value))
 
 static const Entry TOMBSTONE = {
     .key = NULL,
