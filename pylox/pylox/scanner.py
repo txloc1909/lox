@@ -29,6 +29,7 @@ class Scanner:
         self._start: int = 0
         self._current: int = 0
         self._line: int = 1
+        self._col: int = 1
         self._tokens: list[Token] = []
         self._handler = error_handler
 
@@ -37,7 +38,7 @@ class Scanner:
             self._start = self._current
             self._scan_one_token()
 
-        self._tokens.append(Token(TokenType.EOF, "", None, self._line))
+        self._tokens.append(Token(TokenType.EOF, "", None, self._line, self._col))
         return self._tokens
 
     def _scan_one_token(self):
@@ -92,7 +93,7 @@ class Scanner:
                 # do nothing with whitespaces
                 pass
             case "\n":
-                self._line += 1
+                self._bump_line()
             case '"':
                 self._scan_string_literal()
             case _:
@@ -110,11 +111,20 @@ class Scanner:
     def _advance(self) -> str:
         next_char = self._src[self._current]
         self._current += 1
+        self._col += 1
         return next_char
+
+    def _bump_line(self):
+        self._line += 1
+        self._col = 1
 
     def _add_token(self, token_type: TokenType, literal=None):
         lexeme = self._src[self._start:self._current]
-        self._tokens.append(Token(token_type, lexeme, literal, self._line))
+        self._tokens.append(Token(type_=token_type,
+                                  lexeme=lexeme,
+                                  literal=literal,
+                                  line=self._line,
+                                  col=self._col - self._current + self._start))
 
     def _match(self, expected) -> bool:
         if self._at_end():
@@ -123,6 +133,7 @@ class Scanner:
             return False
         else:
             self._current += 1
+            self._col += 1
             return True
 
     def _peek(self) -> str:
@@ -135,7 +146,7 @@ class Scanner:
     def _scan_string_literal(self):
         while self._peek() != '"' and not self._at_end():
             if self._peek() == "\n":
-                self._line += 1
+                self._bump_line()
             self._advance()
 
         if self._at_end():
@@ -172,3 +183,19 @@ class Scanner:
         lexeme = self._src[self._start : self._current]
         token_type = _KEYWORDS.get(lexeme, TokenType.IDENTIFIER)
         self._add_token(token_type)
+
+
+if __name__ == "__main__":
+    src = """var x = 1;
+if (x > 0) {
+    print x;
+}
+"""
+    lines = src.split("\n")
+    for line in lines:
+        print(line)
+
+    from pylox.error_handling import ErrorHandler
+    tokens = Scanner(src, error_handler=ErrorHandler()).scan_tokens()
+    for token in tokens:
+        print(token, token.line, token.col)

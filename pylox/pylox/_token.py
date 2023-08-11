@@ -53,14 +53,13 @@ class TokenType(Enum):
     EOF = 'EOF'
 
 
-# TODO: implement cursor for scanner -> record token's column number
-# -> enable equality & hashing
-@dataclass(eq=False, frozen=True, slots=True)
+@dataclass(frozen=True, slots=True)
 class Token:
     type_: TokenType
     lexeme: str
     literal: float | str | bool | None
     line: int
+    col: int
 
     def __repr__(self):
         return f"{self.type_.name} {self.lexeme} {self.literal}"

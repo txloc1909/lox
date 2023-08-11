@@ -15,5 +15,5 @@ pip install -r requirements-dev.txt
       declared in a scope. When resolving, lookup both the scope and its index,
       store. In the interpreter, use both info to quickly lookup, instead of using
       a map
-- [ ] Scanner: record both token line AND column number
+- [x] Scanner: record both token line AND column number
 - [x] Remove visitor pattern
