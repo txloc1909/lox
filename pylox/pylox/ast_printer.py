@@ -1,5 +1,5 @@
-from scanner import TokenType, Token
-from expr import Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr
+from pylox.scanner import TokenType, Token
+from pylox.expr import Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr
 
 
 class ASTPrinter:
@@ -24,12 +24,13 @@ class ASTPrinter:
 
 
 if __name__ == "__main__":
+    # -123 * (45.67)
     test_expression = BinaryExpr(
         left=UnaryExpr(
-            Token(TokenType.MINUS, "-", None, 1),
+            Token(TokenType.MINUS, "-", None, 1, 1),
             LiteralExpr(value=123),
         ),
-        operator=Token(TokenType.STAR, "*", None, 1),
+        operator=Token(TokenType.STAR, "*", None, 1, 6),
         right=GroupingExpr(inner=LiteralExpr(value=45.67)),
     )
 
