@@ -1,0 +1,32 @@
+// Implementing linked list with objects
+
+class List {
+    init(data, next) {
+        this.data = data;
+        this.next = next;
+    }
+
+    map(function) {
+        var data = function(this.data);
+        var next;
+        if (this.next != nil) next = this.next.map(function);
+        return List(data, next);
+    }
+
+    display() {
+        var list = this;
+        while (list != nil) {
+            print(list.data);
+            list = list.next;
+        }
+    }
+}
+
+
+var list = List(1, List(2, List(3, List(4, nil))));
+list.display();                     // 1 \n 2 \n 3 \n 4 \n
+
+fun double(n) { return n * 2; }
+
+list = list.map(double);
+list.display();                     // 2 \n 4 \n 6 \n 8 \n
