@@ -18,3 +18,5 @@ pip install -r requirements-dev.txt
 - [x] Scanner: record both token line AND column number
 - [x] Scanner: scanning on demand, using generator/iterator pattern
 - [x] Remove visitor pattern
+- [ ] Refactor project structure. Separating frontend, runtime, object
+  representations & semantics

@@ -1,6 +1,6 @@
 from typing import Iterator, Optional
 
-from pylox._token import TokenType, Token
+from pylox.token import TokenType, Token
 from pylox.expr import (Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr,
                   VarExpr, AssignExpr, LogicalExpr, CallExpr, GetExpr, SetExpr,
                   ThisExpr, SuperExpr)

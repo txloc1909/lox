@@ -2,7 +2,7 @@ from typing import Any, Optional
 from enum import Enum
 from dataclasses import dataclass, field
 
-from pylox._token import Token
+from pylox.token import Token
 from pylox.callable import LoxCallable
 from pylox.function import LoxFunction
 from pylox.error_handling import LoxRuntimeError

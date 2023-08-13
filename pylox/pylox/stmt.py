@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from pylox._token import Token
+from pylox.token import Token
 from pylox.expr import Expr, VarExpr
 
 

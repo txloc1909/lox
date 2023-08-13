@@ -1,7 +1,7 @@
 import time
 from contextlib import contextmanager
 
-from pylox._token import Token, TokenType
+from pylox.token import Token, TokenType
 from pylox.expr import (Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr,
                   VarExpr, AssignExpr, LogicalExpr, CallExpr, GetExpr, SetExpr,
                   ThisExpr, SuperExpr)
@@ -9,7 +9,7 @@ from pylox.stmt import (Stmt, ExpressionStmt, PrintStmt, VarStmt, BlockStmt, IfS
                   WhileStmt, FunctionStmt, ReturnStmt, ClassStmt)
 from pylox.callable import LoxCallable
 from pylox.function import LoxFunction, Return
-from pylox._class import LoxClass, LoxInstance
+from pylox.class_ import LoxClass, LoxInstance
 from pylox.environment import Environment
 from pylox.error_handling import LoxRuntimeError, ErrorHandler
 

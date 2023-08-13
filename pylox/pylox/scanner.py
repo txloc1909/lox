@@ -1,7 +1,7 @@
 from typing import Iterator, Optional
 from collections.abc import Mapping
 
-from pylox._token import TokenType, Token
+from pylox.token import TokenType, Token
 from pylox.error_handling import ErrorHandler
 
 _KEYWORDS: Mapping[str, TokenType] = {

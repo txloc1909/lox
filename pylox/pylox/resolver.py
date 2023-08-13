@@ -1,14 +1,14 @@
 from typing import Iterator
 from contextlib import contextmanager, nullcontext, ExitStack
 
-from pylox._token import Token
+from pylox.token import Token
 from pylox.expr import (Expr, VarExpr, AssignExpr, BinaryExpr, CallExpr, GroupingExpr,
                   LiteralExpr, LogicalExpr, UnaryExpr, GetExpr, SetExpr,
                   ThisExpr, SuperExpr)
 from pylox.stmt import (Stmt, BlockStmt, VarStmt, FunctionStmt, ExpressionStmt, IfStmt,
                   PrintStmt, WhileStmt, ReturnStmt, ClassStmt)
 from pylox.function import FunctionType
-from pylox._class import ClassType
+from pylox.class_ import ClassType
 from pylox.error_handling import LoxRuntimeError, ErrorHandler
 
 
