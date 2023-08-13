@@ -16,5 +16,5 @@ pip install -r requirements-dev.txt
       store. In the interpreter, use both info to quickly lookup, instead of using
       a map
 - [x] Scanner: record both token line AND column number
-- [ ] Scanner: scanning on demand, using generator/iterator pattern
+- [x] Scanner: scanning on demand, using generator/iterator pattern
 - [x] Remove visitor pattern

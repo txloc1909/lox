@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Iterator, Optional
 
 from pylox._token import TokenType, Token
 from pylox.expr import (Expr, BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr,
@@ -10,10 +10,11 @@ from pylox.error_handling import ErrorHandler, ParserError
 
 
 class Parser:
-    def __init__(self, tokens: list[Token], error_handler: ErrorHandler):
-        self._tokens = tokens
-        self._current = 0
-        self._handler = error_handler
+    def __init__(self, tokens: Iterator[Token], error_handler: ErrorHandler):
+        self._tokens: Iterator[Token] = tokens
+        self._curr_token: Token = next(self._tokens)
+        self._prev_token: Token = self._curr_token
+        self._handler: ErrorHandler = error_handler
 
     def parse(self) -> list[Stmt]:
         statements: list[Stmt] = []
@@ -70,8 +71,7 @@ class Parser:
         self._consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
         return VarStmt(name, initializer)
 
-    def _func_declaration(self, kind: str):
-        # NOTE: `kind` should take an Enum, instead of str?
+    def _func_declaration(self, kind: str) -> FunctionStmt:
         name = self._consume(TokenType.IDENTIFIER, f"Expect {kind} name.")
         self._consume(TokenType.LEFT_PAREN, f"Expect '(' after {kind} name.")
         parameters: list[Token] = []
@@ -92,7 +92,7 @@ class Parser:
         body = self._block_stmt()
         return FunctionStmt(name, parameters, body)
 
-    def _class_declaration(self):
+    def _class_declaration(self) -> ClassStmt:
         name = self._consume(TokenType.IDENTIFIER, "Expect class name.")
 
         if self._match(TokenType.LESS):
@@ -362,17 +362,18 @@ class Parser:
 
     def _advance(self) -> Token:
         if not self._at_end():
-            self._current += 1
-        return self._prev()
+            self._prev_token = self._curr_token
+            self._curr_token = next(self._tokens)
+        return self._prev_token
 
     def _at_end(self) -> bool:
         return self._peek().type_ == TokenType.EOF
 
     def _peek(self) -> Token:
-        return self._tokens[self._current]
+        return self._curr_token
 
     def _prev(self) -> Token:
-        return self._tokens[self._current - 1]
+        return self._prev_token
 
     def _consume(self, type_: TokenType, message: str) -> Token:
         if self._check(type_):

@@ -1,3 +1,4 @@
+from typing import Iterator, Optional
 from collections.abc import Mapping
 
 from pylox._token import TokenType, Token
@@ -30,56 +31,55 @@ class Scanner:
         self._current: int = 0
         self._line: int = 1
         self._col: int = 1
-        self._tokens: list[Token] = []
         self._handler = error_handler
 
-    def scan_tokens(self) -> list[Token]:
+    def scan_tokens(self) -> Iterator[Token]:
         while not self._at_end():
             self._start = self._current
-            self._scan_one_token()
+            if token := self._scan_one_token():
+                yield token
 
-        self._tokens.append(Token(TokenType.EOF, "", None, self._line, self._col))
-        return self._tokens
+        yield Token(TokenType.EOF, "", None, self._line, self._col)
 
-    def _scan_one_token(self):
+    def _scan_one_token(self) -> Optional[Token]:
         char = self._advance()
         match char:
         ### Single-character tokens
             case "(":
-                self._add_token(TokenType.LEFT_PAREN)
+                return self._create_token(TokenType.LEFT_PAREN)
             case ")":
-                self._add_token(TokenType.RIGHT_PAREN)
+                return self._create_token(TokenType.RIGHT_PAREN)
             case "{":
-                self._add_token(TokenType.LEFT_BRACE)
+                return self._create_token(TokenType.LEFT_BRACE)
             case "}":
-                self._add_token(TokenType.RIGHT_BRACE)
+                return self._create_token(TokenType.RIGHT_BRACE)
             case ",":
-                self._add_token(TokenType.COMMA)
+                return self._create_token(TokenType.COMMA)
             case ".":
-                self._add_token(TokenType.DOT)
+                return self._create_token(TokenType.DOT)
             case "-":
-                self._add_token(TokenType.MINUS)
+                return self._create_token(TokenType.MINUS)
             case "+":
-                self._add_token(TokenType.PLUS)
+                return self._create_token(TokenType.PLUS)
             case ";":
-                self._add_token(TokenType.SEMICOLON)
+                return self._create_token(TokenType.SEMICOLON)
             case "*":
-                self._add_token(TokenType.STAR)
+                return self._create_token(TokenType.STAR)
             ### Two-character
             case "!":
-                self._add_token(
+                return self._create_token(
                     TokenType.BANG_EQUAL if self._match("=") else TokenType.BANG
                 )
             case "=":
-                self._add_token(
+                return self._create_token(
                     TokenType.EQUAL_EQUAL if self._match("=") else TokenType.EQUAL
                 )
             case "<":
-                self._add_token(
+                return self._create_token(
                     TokenType.LESS_EQUAL if self._match("=") else TokenType.LESS
                 )
             case ">":
-                self._add_token(
+                return self._create_token(
                     TokenType.GREATER_EQUAL if self._match("=") else TokenType.GREATER
                 )
             case "/":
@@ -87,23 +87,26 @@ class Scanner:
                 if self._match("/"):
                     while self._peek() != "\n" and not self._at_end():
                         self._advance()
+                    return None
                 else:
-                    self._add_token(TokenType.SLASH)
+                    return self._create_token(TokenType.SLASH)
             case " " | "\r" | "\t":
                 # do nothing with whitespaces
-                pass
+                return None
             case "\n":
                 self._bump_line()
+                return None
             case '"':
-                self._scan_string_literal()
+                return self._scan_string_literal()
             case _:
                 if char.isdigit():
-                    self._scan_number_literal()
+                    return self._scan_number_literal()
                 elif char.isalpha():
-                    self._scan_identifier()
+                    return self._scan_identifier()
                 else:
                     self._handler.error(at=self._line,
                                         message=f"Unexpected character.")
+                    return None
 
     def _at_end(self) -> bool:
         return self._current >= len(self._src)
@@ -118,13 +121,13 @@ class Scanner:
         self._line += 1
         self._col = 1
 
-    def _add_token(self, token_type: TokenType, literal=None):
+    def _create_token(self, token_type: TokenType, literal=None):
         lexeme = self._src[self._start:self._current]
-        self._tokens.append(Token(type_=token_type,
-                                  lexeme=lexeme,
-                                  literal=literal,
-                                  line=self._line,
-                                  col=self._col - self._current + self._start))
+        return Token(type_=token_type,
+                     lexeme=lexeme,
+                     literal=literal,
+                     line=self._line,
+                     col=self._col - self._current + self._start)
 
     def _match(self, expected) -> bool:
         if self._at_end():
@@ -143,7 +146,7 @@ class Scanner:
         return "\0" if self._current + 1 >= len(self._src) else \
                 self._src[self._current + 1]
 
-    def _scan_string_literal(self):
+    def _scan_string_literal(self) -> Optional[Token]:
         while self._peek() != '"' and not self._at_end():
             if self._peek() == "\n":
                 self._bump_line()
@@ -151,15 +154,15 @@ class Scanner:
 
         if self._at_end():
             self._handler.error(at=self._line, message="Unterminated string.")
-            return
+            return None
 
         self._advance()             # The closing \"
 
         # Extract string literal (without the quotes)
         literal = self._src[self._start + 1 : self._current - 1]
-        self._add_token(TokenType.STRING, literal=literal)
+        return self._create_token(TokenType.STRING, literal=literal)
 
-    def _scan_number_literal(self):
+    def _scan_number_literal(self) -> Token:
         while self._peek().isdigit():
             self._advance()
 
@@ -171,18 +174,18 @@ class Scanner:
             while self._peek().isdigit():
                 self._advance()
 
-        self._add_token(
+        return self._create_token(
             TokenType.NUMBER,
             literal=float(self._src[self._start:self._current])
         )
 
-    def _scan_identifier(self):
+    def _scan_identifier(self) -> Token:
         while self._peek().isalnum() or self._peek() == "_":
             self._advance()
 
         lexeme = self._src[self._start : self._current]
         token_type = _KEYWORDS.get(lexeme, TokenType.IDENTIFIER)
-        self._add_token(token_type)
+        return self._create_token(token_type)
 
 
 if __name__ == "__main__":
@@ -196,6 +199,6 @@ if (x > 0) {
         print(line)
 
     from pylox.error_handling import ErrorHandler
-    tokens = Scanner(src, error_handler=ErrorHandler()).scan_tokens()
-    for token in tokens:
+    scanner = Scanner(src, error_handler=ErrorHandler())
+    for token in scanner.scan_tokens():
         print(token, token.line, token.col)
