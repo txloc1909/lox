@@ -11,22 +11,20 @@ by Robert Nystrom.
 ### Do-able
 - [ ] REPL print value evaluated by expression
 - [ ] C-style block comments, without nesting
-- [ ] Native function: `hasField` `getField` `setField` `deleteField`
 
 ### Considering
-- [ ] REPL with `readline` support
-- [ ] `break` and `continue` in `while` & `for` loop
+- [ ] Extend comparison between strings, using lexicographical order
+- [ ] Ternary operator
+- [ ] Anonymous function / `lambda`
 - [ ] Operator + do concat when either operand is string OR support string
       interpolation
-- [ ] Anonymous function / `lambda`
-- [ ] Ternary operator
-- [ ] Extend comparison between strings
+- [ ] `break` and `continue` in `while` & `for` loop
+- [ ] REPL with `readline` support
 - [ ] Traits for multi-inheritance
-- [ ] Switch-case statement: with or without `break` and fallthrough?
-- [ ] Class: support static methods using metaclass approach
-- [ ] Class: support getter methods
 
 ### Useful features
+- [ ] Native function: `hasField` `getField` `setField` `deleteField`
+    - [ ] Signal runtime error from native function
 - [ ] General data structures: list/array, map/dictionary
     - Alternatively, implement fixed-size array as the only native data
       structure, then implement others on top of it
