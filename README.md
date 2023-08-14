@@ -10,15 +10,14 @@ by Robert Nystrom.
 
 ### Do-able
 - [ ] REPL print value evaluated by expression
-- [ ] C-style block comments, without nesting
+- [ ] `break` and `continue` in `while` & `for` loop
+- [ ] Ternary operator
+- [ ] Anonymous function / `lambda`
 
 ### Considering
 - [ ] Extend comparison between strings, using lexicographical order
-- [ ] Ternary operator
-- [ ] Anonymous function / `lambda`
 - [ ] Operator + do concat when either operand is string OR support string
       interpolation
-- [ ] `break` and `continue` in `while` & `for` loop
 - [ ] REPL with `readline` support
 - [ ] Traits for multi-inheritance
 
