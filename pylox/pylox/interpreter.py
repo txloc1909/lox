@@ -224,9 +224,8 @@ class Interpreter:
                 check_number_operands(expr.operator, left, right)
                 return left * right
             case TokenType.PLUS:
-                if isinstance(left, float) and isinstance(right, float):
-                    return left + right
-                elif isinstance(left, str) and isinstance(right, str):
+                if (isinstance(left, float) and isinstance(right, float)) \
+                        or (isinstance(left, str) and isinstance(right, str)):
                     return left + right
                 else:
                     raise LoxRuntimeError(expr.operator, "Operands must be two numbers or two strings.")
